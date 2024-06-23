@@ -1,0 +1,4046 @@
+openapi: 3.0.0
+
+info:
+    title: superfaktura.sk API
+    version: 1.0.0
+    description: |
+        Pomocou API môžete SuperFaktúru prepojiť napríklad s vašim e-shopom, CRM
+        systémom alebo vašou webovou stránkou s objednávkovým formulárom a
+        vystavovať faktúry zákazníkom automaticky.
+
+externalDocs:
+    url: https://github.com/superfaktura/docs/
+
+servers:
+    - url: https://moja.superfaktura.sk
+      description: Slovakia
+    - url: https://moje.superfaktura.cz
+      description: Czech Republic
+    - url: https://meine.superfaktura.at
+      description: Austria
+    - url: https://sandbox.superfaktura.sk
+      description: Sandbox (SK)
+    - url: https://sandbox.superfaktura.cz
+      description: Sandbox (CZ)
+
+security:
+    - SFAPI: []
+
+tags:
+    - name: Bank accounts
+      externalDocs:
+          url: https://github.com/superfaktura/docs/blob/master/bank-account.md
+
+    - name: Cash register item
+      externalDocs:
+          url: https://github.com/superfaktura/docs/blob/master/cash-register-item.md
+
+    - name: Cash register
+      externalDocs:
+          url: https://github.com/superfaktura/docs/blob/master/cash-register.md
+
+    - name: Clients
+      externalDocs:
+          url: https://github.com/superfaktura/docs/blob/master/clients.md
+
+    - name: Contact persons
+      externalDocs:
+          url: https://github.com/superfaktura/docs/blob/master/contact-persons.md
+
+    - name: Expenses
+      externalDocs:
+          url: https://github.com/superfaktura/docs/blob/master/expenses.md
+
+    - name: Invoice
+      externalDocs:
+          url: https://github.com/superfaktura/docs/blob/master/invoice.md
+
+    - name: Other API commands
+      externalDocs:
+          url: https://github.com/superfaktura/docs/blob/master/other.md
+
+    - name: Stock
+      externalDocs:
+          url: https://github.com/superfaktura/docs/blob/master/stock.md
+
+    - name: Tags
+      externalDocs:
+          url: https://github.com/superfaktura/docs/blob/master/tags.md
+
+    - name: Value lists
+      externalDocs:
+          url: https://github.com/superfaktura/docs/blob/master/value-lists.md
+
+paths:
+    /bank_accounts/add:
+        post:
+            summary: Add new bank account
+            tags:
+                - Bank accounts
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/BankAccountReq"
+            responses:
+                200:
+                    description: Successful creation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/BankAccountRes"
+                400:
+                    description: Insufficient privileges
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                            example:
+                                error: 1,
+                                message: Ako používateľ typu Hosť nemáte oprávnenie na túto akciu.
+                                error_message: Ako používateľ typu Hosť nemáte oprávnenie na túto akciu.
+    /bank_accounts/update/{id}:
+        post:
+            summary: Update bank account specified by ID
+            tags:
+                - Bank accounts
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                      type: integer
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/BankAccountReq"
+            responses:
+                200:
+                    description: Successful update
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/BankAccountRes"
+                400:
+                    description: Insufficient privileges or Wrong bank account
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+    /bank_accounts/delete/{id}:
+        post:
+            summary: Delete bank account specified by ID
+            tags:
+                - Bank accounts
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                      type: integer
+            responses:
+                200:
+                    description: Successful deletion
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Message"
+                            example:
+                                error: "0"
+                                message: Bankový účet bol vymazaný
+                400:
+                    description: Insufficient privileges or Wrong bank account
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+                401:
+                    description: Wrong bank account
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+    /bank_accounts/index:
+        get:
+            summary: Get list of bank accounts
+            tags:
+                - Bank accounts
+            responses:
+                200:
+                    description: Success
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                example:
+                                    error: 0
+                                    BankAccounts:
+                                        - BankAccount:
+                                              account: ""
+                                              bank_code: ""
+                                              bank_name: "FatraBanka"
+                                              country_id: "191"
+                                              created: "2050-01-01 23:59:59"
+                                              currency: null
+                                              default: true
+                                              iban: "SK012345678901234567890000"
+                                              id: "1"
+                                              modified: "2050-01-01 23:59:59"
+                                              show: true
+                                              swift: "SUZUKI"
+                                              user_id: "1"
+                                              user_profile_id: "1"
+                                properties:
+                                    BankAccounts:
+                                        type: array
+                                        items:
+                                            type: object
+                                            properties:
+                                                BankAccount:
+                                                    $ref: "#/components/schemas/BankAccountRes"
+                                    error:
+                                        type: integer
+                400:
+                    description: No bank account found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+
+    /cash_register_items/index/{id}:
+        get:
+            summary: Get detailed information about cash register and its items
+            tags:
+                - Cash register item
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  description: Cash register ID
+                  schema:
+                      type: integer
+                - name: date_from
+                  in: query
+                  description: Date from (YYYY-MM-DD)
+                  schema:
+                      type: string
+                      format: date
+                - name: date_to
+                  in: query
+                  description: Date to (YYYY-MM-DD)
+                  schema:
+                      type: string
+                      format: date
+                - name: datefilter
+                  in: query
+                  description: Time filter (today, yesterday, thismonth, thisyear, prevmonth, prevyear)
+                  schema:
+                      type: string
+                - name: sum_from
+                  in: query
+                  description: Sum from
+                  schema:
+                      type: number
+                      format: float
+                - name: sum_to
+                  in: query
+                  description: Sum to
+                  schema:
+                      type: number
+                      format: float
+                - name: term
+                  in: query
+                  schema:
+                      type: string
+                  description: Search term (filter items in output search term)
+                - name: type
+                  in: query
+                  description: Type filter ("in" for income and "out" for outgo)
+                  schema:
+                      type: string
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/CashRegisterItemRes"
+    /cash_register_items/add:
+        post:
+            summary: Add Cash Register Item
+            tags:
+                - Cash register item
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                CashRegisterItem:
+                                    $ref: "#/components/schemas/CashRegisterItemReq"
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/CashRegisterItemRes"
+    /cash_register_items/delete/{id}:
+        get:
+            summary: Get Cash Register Items
+            tags:
+                - Cash register item
+            parameters:
+                - name: id
+                  in: query
+                  required: true
+                  schema:
+                      type: integer
+                      example: 1
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/SummaryRes"
+    /cash_register_items/delete/:
+        post:
+            summary: Delete Cash Register Items
+            tags:
+                - Cash register item
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            example: { "ids": "2,3" }
+                            description: IDs of items to delete (comma separated)
+                            properties:
+                                ids:
+                                    type: string
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                allOf:
+                                  - $ref: "#/components/schemas/SummaryRes"
+                                  - properties:
+                                        status:
+                                            type: number
+                                    
+                400:
+                    description: Wrong item
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    status:
+                                        type: number
+                                    Summary:
+                                        type: number
+
+                401:
+                    description: Insufficient privileges
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/Error"
+
+    /cash_registers/getDetails:
+        get:
+            summary: Get Cash Registers Details
+            description: |
+                Get detailed information about cash registers and its current
+                value status.
+            tags:
+                - Cash register
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        CashRegister:
+                                            $ref: "#/components/schemas/CashRegister"
+    /cash_registers/view/{id}:
+        get:
+            summary: Get Cash Register by ID
+            description: |
+                Get detailed information about cash register by ID.
+            tags:
+                - Cash register
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                      type: integer
+                  example: 1
+            responses:
+                200:
+                    description: Successful operation
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    CashRegister:
+                                        $ref: "#/components/schemas/CashRegister"
+                404:
+                    description: Cash register not found
+                    content:
+                        application/json:
+                            example: '{"error":1,"error_message":"CashRegister with id: 123 not found","message":"CashRegister with id: 123 not found"}'
+                400:
+                    description: Invalid cash register ID
+                    content:
+                        application/json:
+                            example: '{"error":1,"error_message":"Invalid CashRegister id","message":"Invalid CashRegister id"}'
+
+    /clients/create:
+        post:
+            summary: Create client
+            description: Create a new client.
+            tags:
+                - Clients
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            allOf:
+                                - $ref: "#/components/schemas/Client"
+                                - properties:
+                                        name:
+                                            type: string
+                                            description: Client name
+                                
+            responses:
+                200:
+                    description: Successful update
+                    content:
+                        application/json:
+                            schema:
+                                properties:
+                                    data:
+                                        type: object
+                                        properties:
+                                            Client:
+                                                $ref: "#/components/schemas/Client"
+                                    error:
+                                        type: number
+                                    error_message:
+                                        type: string
+                                        description: The client has been saved
+    /clients/index.json/listinfo:1:
+        get:
+            summary: Get client information
+            description: Retrieve information about clients
+            tags:
+                - Clients
+            parameters:
+                - name: page
+                  in: query
+                  description: Page number
+                  required: false
+                  schema:
+                      type: integer
+                - name: perPage
+                  in: query
+                  description: Items per page
+                  required: false
+                  schema:
+                      type: integer
+            responses:
+                200:
+                    description: Successful response
+                    content:
+                        application/json:
+                            example:
+                                itemCount: 3
+                                items:
+                                    - Client:
+                                          id: 1
+                                          name: John Doe
+                                          address: Vymyslena 1
+                                          city: Bratislava
+                                          country: Slovensko
+                                          zip: 555 55
+                                      ClientStat:
+                                          order_count: 0
+                                          order_total: 0.00
+                                          # ... (other fields)
+                                    - Client:
+                                          id: 2
+                                          name: Santa Claus
+                                          address: North Pole 1
+                                          city: Santa’s Village
+                                          country: Finland
+                                          zip: 999 99
+                                      ClientStat:
+                                          order_count: 0
+                                          order_total: 0.00
+                                          # ... (other fields)
+                                          # ... (third client)
+    /clients/edit/{id}:
+        patch:
+            summary: Edit client information
+            description: Edit an existing client
+            tags:
+                - Clients
+            parameters:
+                - name: id
+                  in: path
+                  description: The ID of the client to be edited
+                  required: true
+                  schema:
+                      type: integer
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        example:
+                            data:
+                                Client:
+                                    uuid: "598f4b4f-6fcb-4f25-9828-bf4237a715d0"
+            responses:
+                200:
+                    description: Successful update
+                    content:
+                        application/json:
+                            example:
+                                error: 0
+                                message: The client has been saved
+                400:
+                    description: Bad data format
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                message: Bad data format
+                                error_message: Bad data format
+                404:
+                    description: Client not found
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                message: Client not found
+                                error_message: Client not found
+                403:
+                    description: Insufficient permissions
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                message: You can't edit this item
+                                error_message: You can't edit this item
+    /clients/delete/{id}:
+        delete:
+            summary: Delete client
+            description: Delete an existing client
+            tags:
+                - Clients
+            parameters:
+                - name: id
+                  in: path
+                  description: The ID of the client to be deleted
+                  required: true
+                  schema:
+                      type: integer
+            responses:
+                200:
+                    description: Successful deletion
+                    content:
+                        application/json:
+                            example:
+                                redirect_url: /clients
+                                error: 0
+                                message: Contact deleted
+                404:
+                    description: Client not found
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                message: Client not found
+                                error_message: Client not found
+                403:
+                    description: Insufficient permissions
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                message: You are not authorized to delete this client
+                                error_message: You are not authorized to delete this client
+
+    /contact_people/add/api:1:
+        post:
+            summary: Add contact person to client
+            description: Add a new contact person to an existing client.
+            tags:
+                - Contact persons
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                contactperson:
+                                    type: object
+                                    properties:
+                                        client_id:
+                                            type: integer
+                                        name:
+                                            type: string
+                                        email:
+                                            type: string
+                                        phone:
+                                            type: string
+            responses:
+                200:
+                    description: Successfully added person
+                    content:
+                        application/json:
+                            example: '{"data": {"contactperson": {"client_id": 1, "created": "2050-01-01 23:59:59", "email": "john@example.com", "id": "2", "modified": "2050-01-01 23:59:59", "name": "John", "user_id": "1", "user_profile_id": "1"}}, "state": "SUCCESS"}'
+                404:
+                    description: Wrong client
+                    content:
+                        application/json:
+                            example: '{"error": 1, "error_message": "Client not found", "message": "Client not found"}'
+                403:
+                    description: Insufficient privileges
+                    content:
+                        application/json:
+                            example: '{"error": 1, "error_message": "Nemôžete pridať kontaktnú osobu", "message": "Nemôžete pridať kontaktnú osobu"}'
+    /contact_people/getcontactpeople/{id}:
+        get:
+            summary: Get contact persons for client
+            description: Get a list of contact persons for a client.
+            tags:
+                - Contact persons
+            parameters:
+                - name: id
+                  in: path
+                  description: The ID of the client to get contact persons for
+                  required: true
+                  schema:
+                      type: integer
+            responses:
+                200:
+                    description: Successful
+                    content:
+                        application/json:
+                            example: '[{"contactperson": {"client_id": "3", "created": "2050-01-01 23:59:59", "email": "janko.hrasko@example.com", "id": "1", "modified": "2050-01-01 23:59:59", "name": "Janko Hrasko", "phone": null, "user_id": "1", "user_profile_id": "1"}}, {"contactperson": {"account": null, "address": "Pri Suchom mlyne 6", "country_id": 191, "created": "2050-01-01T23:59:59+01:00", "delivery_country_id": 191, "dic": "2023513470", "dont_travel": null, "iban": "", "ic_dph": "SK2023513470", "ico": "46655034", "id": 3, "modified": "2050-01-01T23:59:59+01:00", "name": "SuperFaktura, s.r.o.", "notices": true, "user_id": 1, "user_profile_id": 1, "zip": "811 04"}}]'
+                404:
+                    description: Wrong client
+                    content:
+                        application/json:
+                            example: '{"error": 1, "error_message": "Client not found", "message": "Client not found"}'
+    /contact_people/delete/{id}:
+        delete:
+            summary: Delete contact person
+            description: Delete a contact person from a client.
+            tags:
+                - Contact persons
+            parameters:
+                - name: id
+                  in: path
+                  description: The ID of the contact person to be deleted
+                  required: true
+                  schema:
+                      type: integer
+            responses:
+                200:
+                    description: Successful deletion
+                    content:
+                        application/json:
+                            example: '{"error": 0}'
+                404:
+                    description: Wrong contact person
+                    content:
+                        application/json:
+                            example: '{"error": 1, "error_message": "Contact not found", "message": "Contact not found"}'
+                403:
+                    description: Insufficient privileges
+                    content:
+                        application/json:
+                            example: '{"error": 1, "error_message": "Nemôžete vymazať kontaktnú osobu", "message": "Nemôžete vymazať kontaktnú osobu"}'
+
+    /expenses/add:
+        post:
+            summary: Add new expense
+            tags:
+                - Expenses
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        example: '{"data": {"Expense": {"name": "Foo bar", "currency": "EUR", "amount": 12.14}}}'
+            responses:
+                200:
+                    description: Successful creation
+                    content:
+                        application/json:
+                            example: '{"data": {"Expense": {"id": "1", "name": "Foo bar", "currency": "EUR", "amount": 12.14}, "ExpenseItem": [{"id": "1", "description": null, "name": null, "tax": "0.00", "unit_price": "12.14"}], "error": 0, "error_message": "", "status": 1}}'
+                403:
+                    description: Insufficient privileges
+                    content:
+                        application/json:
+                            example: '{"error": 1, "error_message": "Ako používateľ typu Hosť nemáte oprávnenie na túto akciu."}'
+                400:
+                    description: Missing data
+                    content:
+                        application/json:
+                            example: '{"error": 1, "error_message": Chýbajúce údaje}'
+    /expenses/edit:
+        post:
+            summary: Edit expense
+            tags:
+                - Expenses
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        example: '{"data": {"Expense": {"id": "1", "name": "Foo bar", "currency": "EUR", "amount": 19.95, "due": "2148-01-01"}}}'
+            responses:
+                200:
+                    description: Successfully edited
+                    content:
+                        application/json:
+                            example: '{"data": {"Expense": {"id": "1", "name": "Foo bar", "currency": "EUR", "amount": 19.95, "due": "2148-01-01"}, "ExpenseItem": [{"id": "1", "description": null, "name": null, "tax": "0.00", "unit_price": "19.9500"}], "error": 0, "error_message": "", "status": 1}, "ExpenseBasicRate": [{"amount": "19.9500", "id": "1", "tax": "0.00", "total": "19.9500"}], "ExpenseExtra": [], "ExpensePayment": [], "Tag": [], "attachments": []}'
+                400:
+                    description: Bad data format / missing expense ID
+                    content:
+                        application/json:
+                            example: '{"error": 3, "error_message": "Bad data format."}'
+                404:
+                    description: Wrong expense
+                    content:
+                        application/json:
+                            example: '{"error": 1, "error_message": "Expense not found"}'
+                403:
+                    description: Insufficient privileges
+                    content:
+                        application/json:
+                            example: '{"error": 1, "error_message": "Ako používateľ typu Hosť nemáte oprávnenie na túto akciu."}'
+                500:
+                    description: Unable to save
+                    content:
+                        application/json:
+                            example: '{"error": 5, "error_message": "The expense could not be saved. Please, try again."}'
+    /expenses/view/{id}.json:
+        get:
+            summary: Expense detail
+            tags:
+                - Expenses
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: integer
+            responses:
+                200:
+                    description: Successfully show details
+                    content:
+                        application/json:
+                            example: '{"Client":[],"Document":[],"Expense":{"accounting_date":"2050-01-01 23:59:59","amount":12.14,"amount2":null,"amount3":null,"amount_country_home":"12.1400","amount_home":"12.1400","amount_paid":0,"amount_paid_vat":0,"client_data":null,"client_id":null,"comment":null,"constant":null,"country_exchange_rate":"1.00000000000000","created":"2050-01-01 23:59:59","currency":"EUR","delivery":"2050-01-01 23:59:59","demo":"0","discount":"0","discount_total":"0.0000","document_number":null,"due":"2050-01-01 23:59:59","exchange_rate":"1.00000000000000","expense_category_id":null,"expense_no":"1","flag":"issued","home_currency":"EUR","id":"1","missing_bank_account":true,"modified":"2050-01-01 23:59:59","my_data":"{\"id\":\"1\",\"user_id\":1,\"country_id\":\"191\",\"company_name\":\"SuperFaktura, s.r.o.\",\"name\":null,\"ico\":\"46655034\",\"dic\":\"2023513470\",\"ic_dph\":\"SK2023513470\",\"business_register\":\"Obchodn\\u00fd register Okresn\\u00e9ho s\\u00fadu Bratislava I, oddiel: Sro, vlo\\u017eka \\u010d. 81403\\/B\",\"address\":\"Pri Suchom mlyne 6\",\"city\":\"Bratislava - mestsk\\u00e1 \\u010das\\u0165 Star\\u00e9 Mesto\",\"zip\":\"811 04\",\"tax_payer\":\"1\",\"vat_interval\":null,\"company_type\":\"ltd\"}","name":"Foo bar","number":"2020001","paid":0,"paid_vat":0,"paydate":null,"qr":"","qr_type":"","qr_url":"","qr_url_max":"","rates":{"0.00":{"base":12.14,"vat":0}},"recurring":null,"sequence_id":"9","specific":null,"status":"1","tags":null,"tax":null,"tax_code":null,"taxable_supply":null,"taxdate":"2050-01-01","total":"12.1400","total_country_home":"12.1400","total_home":"12.1400","type":"invoice","user_id":"1","user_profile_id":"1","variable":null,"vat":0,"vat2":null,"vat3":null,"version":"basic"},"ExpenseBasicRate":[{"amount":"12.1400","id":"1","tax":"0.00","total":"12.1400"}],"ExpenseExtra":[],"ExpenseItem":[{"description":null,"discount":"0.00000","discount_description":null,"id":"1","name":null,"ordernum":"0","quantity":"1.00000","stock_item_id":null,"tax":"0.00","total":"12.1400","type":"rate","unit":null,"unit_price":"12.1400","unit_total":"12.1400"}],"ExpensePayment":[],"MyData":{"address":"Pri Suchom mlyne 6","business_register":"Obchodný register Okresného súdu Bratislava I, oddiel: Sro, vložka č. 81403/B","city":"Bratislava - mestská časť Staré Mesto","company_name":"SuperFaktura, s.r.o.","company_type":"ltd","country_id":"191","dic":"2023513470","ic_dph":"SK2023513470","ico":"46655034","id":"1","name":null,"tax_payer":"1","user_id":1,"vat_interval":null,"zip":"811 04"},"RelatedItem":[],"Tag":[],"VatSummary":[{"base":12.14,"vat":0}],"attachments":[]}}'
+                404:
+                    description: Wrong expense
+                    content:
+                        application/json:
+                            example: '{"error":1,"error_message":"Expense not found","message":"Expense not found"}'
+                            
+    # FIXME: non standard path, unable to define
+    /expenses/index.json[/{ATTRIBUTE}:{VALUE}]*/:
+        get:
+            summary: Get list of expenses
+            tags:
+                - Expenses
+            parameters:
+                - in: header
+                  name: Authorization
+                  required: true
+                  schema:
+                      type: string
+                - in: query
+                  name: amount_from
+                  schema:
+                      type: number
+                - in: query
+                  name: amount_to
+                  schema:
+                      type: number
+                - in: query
+                  name: category
+                  schema:
+                      type: integer
+                - in: query
+                  name: client_id
+                  schema:
+                      type: integer
+                - in: query
+                  name: created
+                  schema:
+                      type: integer
+                - in: query
+                  name: modified
+                  schema:
+                      type: integer
+                - in: query
+                  name: created_since
+                  schema:
+                      type: string
+                - in: query
+                  name: created_to
+                  schema:
+                      type: string
+                - in: query
+                  name: modified_since
+                  schema:
+                      type: string
+                - in: query
+                  name: modified_to
+                  schema:
+                      type: string
+                - in: query
+                  name: delivery
+                  schema:
+                      type: integer
+                - in: query
+                  name: delivery_since
+                  schema:
+                      type: string
+                - in: query
+                  name: delivery_to
+                  schema:
+                      type: string
+                - in: query
+                  name: direction
+                  schema:
+                      type: string
+                - in: query
+                  name: due
+                  schema:
+                      type: string
+                - in: query
+                  name: listinfo
+                  schema:
+                      type: integer
+                - in: query
+                  name: page
+                  schema:
+                      type: integer
+                - in: query
+                  name: payment_type
+                  schema:
+                      type: string
+                - in: query
+                  name: per_page
+                  schema:
+                      type: integer
+                - in: query
+                  name: search
+                  schema:
+                      type: string
+                - in: query
+                  name: sort
+                  schema:
+                      type: string
+                - in: query
+                  name: status
+                  schema:
+                      type: string
+                - in: query
+                  name: type
+                  schema:
+                      type: string
+            responses:
+                200:
+                    description: Successful response
+                    content:
+                        application/json:
+                            example: '{"itemCount":3,"items":[{"Client":[],"Document":[],"Expense":{"accounting_date":"2050-01-01 23:59:59","amount":12.14,"amount2":null,"amount3":null,"amount_country_home":"12.1400","amount_home":"12.1400","amount_paid":0,"amount_paid_vat":0,"client_data":null,"client_id":null,"comment":null,"constant":null,"country_exchange_rate":"1.00000000000000","created":"2050-01-01","currency":"EUR","delivery":"2050-01-01","demo":"0","discount":"0","discount_total":"0.0000","document_number":null,"due":"2050-01-01","exchange_rate":"1.00000000000000","expense_category_id":null,"expense_no":"2","flag":"issued","home_currency":"EUR","id":"2","is_payable_by_tatrabanka":false,"missing_bank_account":true,"modified":"2050-01-01 23:59:59","my_data":"{\"id\":\"1\",\"user_id\":1,\"country_id\":\"191\",\"company_name\":\"SuperFaktura, s.r.o.\",\"name\":null,\"ico\":\"46655034\",\"dic\":\"2023513470\",\"ic_dph\":\"SK2023513470\",\"business_register\":\"Obchodn\\u00fd register Okresn\\u00e9ho s\\u00fadu Bratislava I, oddiel: Sro, vlo\\u017eka \\u010d. 81403\\/B\",\"address\":\"Pri Suchom mlyne 6\",\"city\":\"Bratislava - mestsk\\u00e1 \\u010das\\u0165 Star\\u00e9 Mesto\",\"zip\":\"811 04\",\"tax_payer\":\"1\",\"vat_interval":null,"company_type":"ltd"},"name":"Foo bar","number":"2020002","paid":0,"paid_vat":0,"paydate":null,"qr":"","qr_type":"","qr_url":"","qr_url_max":"","rates":[],"recurring":null,"sequence_id":"9","specific":null,"status":"1","tags":null,"tax":null,"tax_code":null,"taxable_supply":null,"taxdate":"2050-01-01","total":"12.1400","total_country_home":"12.1400","total_home":"12.1400","type":"invoice","user_id":"1","user_profile_id":"1","variable":null,"vat":0,"vat2":null,"vat3":null,"version":"basic"},"ExpenseBasicRate":[{"amount":"12.1400","id":"2","tax":"0.00","total":"12.1400"}],"ExpenseExtra":[],"ExpenseItem":[{"description":null,"discount":"0.00000","discount_description":null,"id":"2","name":null,"ordernum":"0","quantity":"1.00000","stock_item_id":null,"tax":"0.00","total":"12.1400","type":"rate","unit":null,"unit_price":"12.1400","unit_total":"12.1400"}],"ExpensePayment":[],"MyData":{"address":"Pri Suchom mlyne 6","business_register":"Obchodný register Okresného súdu Bratislava I, oddiel: Sro, vložka č. 81403/B","city":"Bratislava - mestská časť Staré Mesto","company_name":"SuperFaktura, s.r.o.","company_type":"ltd","country_id":"191","dic":"2023513470","ic_dph":"SK2023513470","ico":"46655034","id":"1","name":null,"tax_payer":"1","user_id":1,"vat_interval":null,"zip":"811 04"},"RelatedItem":[],"Tag":[],"VatSummary":[{"base":12.14,"vat":0}],"attachments":[]}],"page":2,"pageCount":3,"perPage":1}}'
+    /expenses/delete/{id}:
+        get:
+            summary: Delete expense
+            description: Delete an expense by ID.
+            tags:
+                - Expenses
+            parameters:
+                - in: path
+                  name: id
+                  required: true
+                  schema:
+                      type: integer
+            responses:
+                200:
+                    description: Successful deletion
+                    content:
+                        application/json:
+                            example: '{"message": "Expense deleted", "status": "success"}'
+                404:
+                    description: Nonexistent ID
+                    content:
+                        application/json:
+                            example: '{"error": 1, "error_message": "Expense not found", "message": "Expense not found"}'
+                403:
+                    description: Insufficient privileges
+                    content:
+                        application/json:
+                            example: '{"message": "Expense was not deleted", "status": "error"}'
+                500:
+                    description: Unsuccessful deletion
+                    content:
+                        application/json:
+                            example: '{"error": 2, "error_message": "Error deleting expense."}'
+    /expense_payments/add:
+        post:
+            summary: Add expense payment
+            description: Add a payment to an expense.
+            tags:
+                - Expenses
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        example: '{"ExpensePayment": {"expense_id": 1, "currency": "EUR", "amount": 12}}'
+            responses:
+                200:
+                    description: Successfully added
+                    content:
+                        application/json:
+                            example: '{"data": {"ExpensePayment": {"amount": 12, "currency": "EUR", "expense_id": 1, "id": "1"}}, "error": 0, "expense": { /* ...expense details... */ }, "message": "Úhrada bola uložená"}'
+                400:
+                    description: Missing data
+                    content:
+                        application/json:
+                            example: '{"error": 1, "error_message": Chýbajúce údaje, "message": Chýbajúce údaje}'
+                404:
+                    description: Wrong expense
+                    content:
+                        application/json:
+                            example: '{"error": 1, "message": "Expense not found"}'
+    /expense_payments/delete/{payment_id}:
+        get:
+            summary: Delete expense payment
+            description: Delete an expense payment by ID.
+            tags:
+                - Expenses
+            parameters:
+                - in: path
+                  name: payment_id
+                  required: true
+                  schema:
+                      type: integer
+            responses:
+                200:
+                    description: Successful deletion
+                    content:
+                        application/json:
+                            example: '{"error": 0, "message": "Úhrada nákladu bola zmazaná"}'
+                404:
+                    description: Payment not found
+                    content:
+                        application/json:
+                            example: '{"error": 1, "message": "Platba sa nenašla"}'
+                500:
+                    description: Unsuccessful deletion
+                    content:
+                        application/json:
+                            example: '{"error": 1, "message": "Expense payment was not deleted"}'
+    /expenses/addRelatedItem:
+        post:
+            summary: Add related item
+            description: Add a related item (document) to an expense.
+            tags:
+                - Expenses
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        example: '{"parent_id": 1, "parent_type": "expense", "child_id": 2, "child_type": "invoice"}'
+            responses:
+                200:
+                    description: Successful linking of documents
+                    content:
+                        application/json:
+                            example: '{"data": {"Expense": { /* ...expense details... */ }, "RelatedItem": {"id": "2"}}, "error": 0, "error_message": ""}'
+                400:
+                    description: Invalid ID or data
+                    content:
+                        application/json:
+                            example: '{"error": 1, "error_message": "Invalid id" }'
+    /expenses/deleteRelatedItem/{relation_id}:
+        get:
+            summary: Delete related item
+            description: Delete a relation between two documents.
+            tags:
+                - Expenses
+            parameters:
+                - in: path
+                  name: relation_id
+                  required: true
+                  schema:
+                      type: integer
+            responses:
+                200:
+                    description: Successful removal
+                    content:
+                        application/json:
+                            example: '{"error": 0, "error_message": ""}'
+
+    /create-invoice:
+        post:
+            summary: Create Invoice
+            tags:
+                - Invoice
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                data:
+                                    type: object
+                                    properties:
+                                        Client:
+                                            $ref: "#/components/schemas/Client"
+                                        ClientData:
+                                            $ref: "#/components/schemas/ClientData"
+                                        Invoice:
+                                            $ref: "#/components/schemas/Invoice"
+                                        InvoiceEmail:
+                                            type: array
+                                            items:
+                                                $ref: "#/components/schemas/InvoiceEmail"
+                                        InvoiceExtra:
+                                            $ref: "#/components/schemas/InvoiceExtra"
+                                        InvoiceItem:
+                                            $ref: "#/components/schemas/InvoiceItem"
+                                        InvoicePayment:
+                                            $ref: "#/components/schemas/InvoicePayment"
+                                        InvoiceSetting:
+                                            $ref: "#/components/schemas/InvoiceSettings"
+                                        Logo:
+                                            type: array
+                                            items:
+                                                $ref: "#/components/schemas/Logo"
+                                        MyData:
+                                            $ref: "#/components/schemas/MyData"
+                                        PaymentLink:
+                                            type: string
+                                        Paypal:
+                                            type: boolean
+                                        PostStamp:
+                                            type: array
+                                            # TODO: schema
+                                            items: {}
+                                        RelatedItems:
+                                            type: array
+                                            # TODO: schema
+                                            items: {}
+                                        Signature:
+                                            $ref: "#/components/schemas/Signature"
+                                        Summary:
+                                            $ref: "#/components/schemas/Summary"
+                                        SummaryInvoice:
+                                            $ref: "#/components/schemas/SummaryInvoice"
+                                        Tag:
+                                            type: array
+                                            # TODO: schema
+                                            items: {}
+                                        UnitCount:
+                                            type: array
+                                            # TODO: schema
+                                            items: {}
+                                error:
+                                    type: integer
+                                error_message:
+                                    type: object
+                                    properties:
+                                        data_bad_format:
+                                            type: string
+            responses:
+                200:
+                    description: Successful Addition
+                403:
+                    description: Insufficient Privileges
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: integer
+                                    error_message:
+                                        type: string
+                500:
+                    description: Missing Data or Bad Format
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: integer
+                                    error_message:
+                                        type: object
+                                        properties:
+                                            data_bad_format:
+                                                type: string
+    /invoices/edit:
+        post:
+            summary: "Edit invoice."
+            tags:
+                - Invoice
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                Invoice:
+                                    type: object
+                                    properties:
+                                        id:
+                                            type: integer
+                                            description: "ID of the invoice that will be edited."
+                                        discount:
+                                            type: integer
+                                            description: "Discount value for the invoice."
+                                # Add other properties as needed
+            responses:
+                200:
+                    description: "Successfully edited."
+                    content:
+                        application/json:
+                            example:
+                                status: true
+                                data:
+                                    0:
+                                        to_pay: "11.400000"
+                                        to_pay_in_invoice_currency: "11.40"
+                                        total: "11.40"
+                                    Client:
+                                        $ref: "#/components/schemas/Client"
+                                    ClientData:
+                                        $ref: "#/components/schemas/ClientData"
+                                    Invoice:
+                                        $ref: "#/components/schemas/Invoice"
+                                    InvoiceEmail:
+                                        $ref: "#/components/schemas/InvoiceEmail"
+                                    InvoiceExtra:
+                                        $ref: "#/components/schemas/InvoiceExtra"
+                                    InvoiceItem:
+                                        $ref: "#/components/schemas/InvoiceItem"
+                                    InvoicePayment:
+                                        $ref: "#/components/schemas/InvoicePayment"
+                                    InvoiceSetting:
+                                        $ref: "#/components/schemas/InvoiceSettings"
+                                    Logo:
+                                        $ref: "#/components/schemas/Logo"
+                                    MyData:
+                                        $ref: "#/components/schemas/MyData"
+                                    Paypal:
+                                        schemas:
+                                            type: boolean
+                                    PostStamp:
+                                        schemas:
+                                            array:
+                                            # TODO: schema
+                                            type: {}
+                                    RelatedItems:
+                                        schemas:
+                                            array:
+                                            # TODO: schema
+                                            type: {}
+                                    Signature:
+                                        $ref: "#/components/schemas/Signature"
+                                    Summary:
+                                        $ref: "#/components/schemas/Summary"
+                                    SummaryInvoice:
+                                        $ref: "#/components/schemas/SummaryInvoice"
+                                    Tag:
+                                        schemas:
+                                            array:
+                                            # TODO: schema
+                                            type: {}
+                                    UnitCount:
+                                        schemas:
+                                            array:
+                                            # TODO: schema
+                                            type: {}
+                                error: null
+                                message: null
+                404:
+                    description: "Error response"
+                    content:
+                        application/json:
+                            example:
+                                error: 2
+                                message: "Invoice ID not found."
+                                status: false
+                500:
+                    description: "Error response"
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                message: "Bad data format."
+                                status: false
+    /invoices/getInvoiceDetails/{ids}:
+        get:
+            summary: Get invoices details.
+            description: |
+                Get information about multiple invoices at once. You can
+                specify up to 100 invoice IDs.
+            tags:
+                - Invoice
+            parameters:
+                - in: path
+                  name: ids
+                  description: "List of invoice IDs separated by comma."
+                  required: true
+                  schema:
+                      type: string
+            operationId: "getInvoiceDetails"
+            responses:
+                200:
+                    description: "Successful response."
+                    content:
+                        application/json:
+                            example:
+                                "1":
+                                    0:
+                                        to_pay: "12.000000"
+                                        to_pay_in_invoice_currency: "12.00"
+                                        total: "12.00"
+                                    Client:
+                                        $ref: "#/components/schemas/Client"
+                                    ClientData:
+                                        $ref: "#/components/schemas/ClientData"
+                                    Invoice:
+                                        $ref: "#/components/schemas/Invoice"
+                                    InvoiceEmail:
+                                        $ref: "#/components/schemas/InvoiceEmail"
+                                    InvoiceExtra:
+                                        $ref: "#/components/schemas/InvoiceExtra"
+                                    InvoiceItem:
+                                        $ref: "#/components/schemas/InvoiceItem"
+                                    InvoicePayment:
+                                        $ref: "#/components/schemas/InvoicePayment"
+                                    InvoiceSetting:
+                                        $ref: "#/components/schemas/InvoiceSettings"
+                                    Logo:
+                                        $ref: "#/components/schemas/Logo"
+                                    MyData:
+                                        $ref: "#/components/schemas/MyData"
+                                    Paypal:
+                                        schemas:
+                                            type: boolean
+                                    PostStamp:
+                                        schemas:
+                                            array:
+                                            # TODO: schema
+                                            type: {}
+                                    RelatedItems:
+                                        schemas:
+                                            array:
+                                            # TODO: schema
+                                            type: {}
+                                    Signature:
+                                        $ref: "#/components/schemas/Signature"
+                                    Summary:
+                                        $ref: "#/components/schemas/Summary"
+                                    SummaryInvoice:
+                                        $ref: "#/components/schemas/SummaryInvoice"
+                                    Tag:
+                                        schemas:
+                                            array:
+                                            # TODO: schema
+                                            type: {}
+                                    UnitCount:
+                                        schemas:
+                                            array:
+                                            # TODO: schema
+                                            type: {}
+                                "2":
+                                    # Details for invoice ID 2 go here
+                                # Add more invoices as needed
+                400:
+                    description: "Error response"
+                    content:
+                        application/json:
+                            examples:
+                                invalidIDs:
+                                    value:
+                                        error: 1
+                                        message: "Invalid invoice IDs format."
+                                        status: false
+    
+    # FIXME: non standard path, unable to define
+    /invoices/index.json[/{ATTRIBUTE}:{VALUE}]*:
+        get:
+            summary: Get list of invoices
+            description: |
+                Retrieve a list of invoices with optional filters and sorting.
+            tags:
+              - Invoice
+            parameters:
+                # Path parameters
+                - name: direction
+                  required: true
+                  in: path
+                  description: Sorting direction (ASC or DESC)
+                  schema:
+                      type: string
+                      default: "DESC"
+                - name: listinfo
+                  required: true
+                  in: path
+                  description: Show meta data about result (0=no, 1=yes)
+                  schema:
+                      type: integer
+                      default: 0
+                - name: page
+                  required: true
+                  in: path
+                  description: Page number
+                  schema:
+                      type: integer
+                      default: 1
+                - name: per_page
+                  required: true
+                  in: path
+                  description: Number of items per page (max 200)
+                  schema:
+                      type: integer
+                - name: sort
+                  required: true
+                  in: path
+                  description: Attribute to sort by
+                  schema:
+                      type: string
+                      default: "regular_count"
+                - name: type
+                  required: true
+                  in: path
+                  description: Type of document (proforma, regular, etc.). Use `|` as separator for multiple values.
+                  schema:
+                      type: string
+                      default: "regular"
+                # Query parameters
+                - name: amount_from
+                  in: query
+                  description: Amount from
+                  required: false
+                  schema:
+                      type: number
+                      format: float
+                      default: 0
+                - name: amount_to
+                  in: query
+                  description: Amount to
+                  required: false
+                  schema:
+                      type: number
+                      format: float
+                      default: 0
+                - name: client_id
+                  in: query
+                  description: Client ID
+                  required: false
+                  schema:
+                      type: integer
+                - name: created
+                  in: query
+                  description: Constant specifying time filtering
+                  required: false
+                  schema:
+                      type: integer
+                      default: 6
+                - name: created_since
+                  in: query
+                  description: Creation date since (requires `created:3`)
+                  required: false
+                  schema:
+                      type: string
+                      format: date
+                - name: created_to
+                  in: query
+                  description: Creation date to (requires `created:3`)
+                  required: false
+                  schema:
+                      type: string
+                      format: date
+                - name: delivery
+                  in: query
+                  description: Constant specifying time filtering
+                  required: false
+                  schema:
+                      type: integer
+                - name: delivery_since
+                  in: query
+                  description: Delivery date from (requires `delivery:3`)
+                  required: false
+                  schema:
+                      type: string
+                      format: date
+                - name: delivery_to
+                  in: query
+                  description: Delivery date to (requires `delivery:3`)
+                  required: false
+                  schema:
+                      type: string
+                      format: date
+                - name: delivery_type
+                  in: query
+                  description: Delivery type. Use `|` as separator for multiple values.
+                  required: false
+                  schema:
+                      type: string
+                - name: ignore
+                  in: query
+                  description: IDs of invoices to be ignored. Use `|` as separator for multiple values.
+                  required: false
+                  schema:
+                      type: string
+                - name: invoice_no_formatted
+                  in: query
+                  description: Formatted invoice number
+                  required: false
+                  schema:
+                      type: string
+                - name: modified
+                  in: query
+                  description: Last modification date constant specifying time filtering
+                  required: false
+                  schema:
+                      type: integer
+                - name: modified_since
+                  in: query
+                  description: Last modification date from (requires `modified:3`)
+                  required: false
+                  schema:
+                      type: string
+                      format: date
+                - name: modified_to
+                  in: query
+                  description: Last modification date to (requires `modified:3`)
+                  required: false
+                  schema:
+                      type: string
+                      format: date
+                - name: order_no
+                  in: query
+                  description: Order number, from which invoice is created
+                  required: false
+                  schema:
+                      type: string
+                - name: paydate
+                  in: query
+                  description: Constant specifying time filtering
+                  required: false
+                  schema:
+                      type: integer
+                - name: paydate_since
+                  in: query
+                  description: Pay date since (requires `paydate:3`)
+                  required: false
+                  schema:
+                      type: string
+                      format: date
+                - name: paydate_to
+                  in: query
+                  description: Pay date to (requires `paydate:3`)
+                  required: false
+                  schema:
+                      type: string
+                      format: date
+                - name: payment_type
+                  in: query
+                  description: Payment types. Use `|` as separator for multiple values.
+                  required: false
+                  schema:
+                      type: string
+                - name: search
+                  in: query
+                  description: Base64 encoded string
+                  required: false
+                  schema:
+                      type: string
+                - name: status
+                  in: query
+                  description: Invoice status
+                  required: false
+                  schema:
+                      type: string
+                - name: tag
+                  in: query
+                  description: Tag ID
+                  required: false
+                  schema:
+                      type: integer
+                - name: variable
+                  in: query
+                  description: Variable symbol
+                  required: false
+                  schema:
+                      type: string
+            responses:
+                200:
+                    description: Successful response
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: array
+                                        items:
+                                            type: object
+                                            properties:
+                                                id:
+                                                    type: integer
+                                                client_id:
+                                                    type: integer
+                                                amount:
+                                                    type: number
+                                                    format: float
+                                                created:
+                                                    type: string
+                                                    format: date
+                                                delivery:
+                                                    type: string
+                                                    format: date
+                                                modified:
+                                                    type: string
+                                                    format: date
+                                                invoice_no_formatted:
+                                                    type: string
+                                                order_no:
+                                                    type: string
+                                                paydate:
+                                                    type: string
+                                                    format: date
+                                                payment_type:
+                                                    type: string
+                                                status:
+                                                    type: string
+                                                tag:
+                                                    type: integer
+                                                variable:
+                                                    type: string
+                                    meta:
+                                        type: object
+                                        properties:
+                                            total:
+                                                type: integer
+                                            page:
+                                                type: integer
+                                            per_page:
+                                                type: integer
+    /exports:
+        post:
+            summary: Export invoices.
+            tags:
+                - Invoice
+            requestBody:
+                content:
+                    application/json:
+                        example:
+                            # TODO: schemas
+                            $ref: {}
+            responses:
+                200:
+                    description: Successful response.
+                    content:
+                        application/pdf:
+                            example: !include response_pdf.example
+    /invoices/delete/{id}:
+        get:
+            summary: Delete invoice by ID.
+            tags:
+                - Invoice
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                      type: integer
+            responses:
+                200:
+                    description: Successful deletion
+                    content:
+                        application/json:
+                            example: !include response_delete_invoice.example
+                404:
+                    description: Wrong ID
+                    content:
+                        application/json:
+                            example: !include response_wrong_id.example
+    /invoices/will_not_be_paid/{id}:
+        get:
+            summary: Set invoice as "will not be paid".
+            tags:
+                - Invoice
+            parameters:
+                - name: id
+                  in: path
+                  required: true
+                  schema:
+                      type: integer
+            responses:
+                200:
+                    description: Successfully marked
+                    content:
+                        application/json:
+                            example: !include response_mark_as_not_paid.example
+                404:
+                    description: Wrong invoice
+                    content:
+                        application/json:
+                            example: !include response_wrong_invoice.example
+                403:
+                    description: Insufficient privileges
+                    content:
+                        application/json:
+                            example: !include response_insufficient_privileges.example
+    /invoice_payments/add/ajax:1/api:1:
+        post:
+            summary: Pay invoice.
+            tags:
+                - Invoice
+            requestBody:
+                content:
+                    application/json:
+                        example: !include request_pay_invoice.example
+            responses:
+                200:
+                    description: Successfully added payment
+                    content:
+                        application/json:
+                            example: !include response_pay_invoice.example
+                404:
+                    description: Invalid ID
+                    content:
+                        application/json:
+                            example: !include response_pay_invalid_id.example
+                400:
+                    description: Paying invalid invoice type
+                    content:
+                        application/json:
+                            example: !include response_pay_invalid_type.example
+    /invoices/send:
+        post:
+            summary: Send invoice via mail.
+            tags:
+                - Invoice
+            requestBody:
+                content:
+                    application/json:
+                        example: !include request_send_invoice.example
+            responses:
+                200:
+                    description: Successfully sent
+                    content:
+                        application/json:
+                            example: !include response_send_invoice.example
+                404:
+                    description: Invoice not found
+                    content:
+                        application/json:
+                            example: !include response_send_invoice_not_found.example
+                # 13:
+                #     description: Invalid recipient email address
+                #     content:
+                #         application/json:
+                #             example: !include response_send_invalid_email.example
+                # 1:
+                #     description: Any other problem
+                #     content:
+                #         application/json:
+                #             example: !include response_send_other_problem.example
+    /invoices/mark_as_sent:
+        post:
+            summary: Mark invoice as sent via email.
+            tags:
+                - Invoice
+            requestBody:
+                content:
+                    application/json:
+                        example: !include request_mark_as_sent.example
+            responses:
+                200:
+                    description: Successfully marked
+                    content:
+                        application/json:
+                            example: !include response_mark_as_sent.example
+                # 2:
+                #     description: Wrong HTTP method
+                #     content:
+                #         application/json:
+                #             example: !include response_mark_as_sent_wrong_method.example
+                400:
+                    description: Invalid data
+                    content:
+                        application/json:
+                            example: !include response_mark_as_sent_invalid_data.example
+                500:
+                    description: Invalid invoice ID
+                    content:
+                        application/json:
+                            example: !include response_mark_as_sent_invalid_id.example
+    /invoices/post:
+        post:
+            summary: Send invoice via post
+            tags:
+                - Invoice
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                Post:
+                                    type: object
+                                    properties:
+                                        delivery_address:
+                                            type: string
+                                        delivery_city:
+                                            type: string
+                                        delivery_country_id:
+                                            type: integer
+                                        delivery_state:
+                                            type: string
+                                        delivery_name:
+                                            type: string
+                                        delivery_zip:
+                                            type: string
+                                        invoice_id:
+                                            type: integer
+            responses:
+                200:
+                    description: Successfully posted
+                    content:
+                        application/json:
+                            example:
+                                data:
+                                    $ref: "#/components/schemas/Invoice"
+                400:
+                    description: Missing address data
+                    content:
+                        application/json:
+                            example:
+                                error: 6
+                                message: Address data error.
+                403:
+                    description: Not enough post stamps
+                    content:
+                        application/json:
+                            example:
+                                error: 7
+                                message: No post stamps left.
+    /invoices/mark_sent/{id}:
+        get:
+            summary: Mark invoice as sent
+            tags:
+                - Invoice
+            parameters:
+                - name: id
+                  in: path
+                  description: Invoice ID
+                  required: true
+                  schema:
+                      type: integer
+            responses:
+                200:
+                    description: Successfully marked
+                    content:
+                        application/json:
+                            example:
+                                error: 0
+                                error_message: ""
+                                marked: true
+                400:
+                    description: Wrong invoice
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                error_message: "Snažíte sa označ"
+    /invoices/addRelatedItem:
+        post:
+            summary: Add related item (document)
+            tags:
+                - Invoice
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                parent_id:
+                                    type: integer
+                                parent_type:
+                                    type: string
+                                child_id:
+                                    type: integer
+                                child_type:
+                                    type: string
+            responses:
+                200:
+                    description: Successful linking of documents
+                    content:
+                        application/json:
+                            example:
+                                data:
+                                    $ref: "#/components/schemas/Invoice"
+                400:
+                    description: Invalid ID or invalid data
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                error_message: "Invalid id"
+    /invoices/deleteRelatedItem/{relation_id}:
+        get:
+            summary: Delete related item
+            tags:
+                - Invoice
+            parameters:
+                - name: relation_id
+                  in: path
+                  description: Relation ID
+                  required: true
+                  schema:
+                      type: integer
+            responses:
+                200:
+                    description: Successful removal
+                    content:
+                        application/json:
+                            example:
+                                error: 0
+                                error_message: ""
+                400:
+                    description: Invalid ID
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                error_message: "Invalid id"
+
+    /users/company_switcher:
+        get:
+            summary: Get list of your accounts
+            tags:
+                - Other API commands
+            responses:
+                200:
+                    description: Successfully retrieved profiles
+                    content:
+                        application/json:
+                            example:
+                                apikey: 9771ef49cd922da79b20745b7bc0fc24
+                                companies:
+                                    - Logo:
+                                          0:
+                                              alternative: null
+                                              basename: 4311c1895aa334d39ac8_1_exads_logo_rgb.png
+                                              checksum: a1dcdc392d08d6d1caaf148225f2a7d4
+                                              created: "2050-01-01 23:59:59"
+                                              default: true
+                                              delete_flag: false
+                                              dirname: img
+                                              extern_file: "0"
+                                              foreign_key: "1"
+                                              group: logo
+                                              id: "1"
+                                              model: User
+                                              modified: "2050-01-01 23:59:59"
+                                              path: img/4311c1895aa334d39ac8_1_exads_logo_rgb.png
+                                              size: "49743"
+                                          size:
+                                              0: 75
+                                              1: 57
+                                              2: 3
+                                              3: 'width="75" height="57"'
+                                              bits: 8
+                                              mime: image/png
+                                          url: https://moja.superfaktura.sk/img/no-logo.png
+                                    - UserProfile:
+                                          address: Pri Suchom mlyne 6
+                                          affiliate_id: null
+                                          business_register: "Obchodný register Okresného súdu Bratislava I, oddiel: Sro, vložka č. 81403/B"
+                                          bysquare: true
+                                          city: Bratislava - mestská časť Staré Mesto
+                                          company_name: SuperFaktura, s.r.o.
+                                          company_type: ltd
+                                          country_id: "191"
+                                          created: "2050-01-01 23:59:59"
+                                          date_mask: d.m.Y
+                                          default_constant: ""
+                                          default_delivery: created
+                                          default_payment_type: null
+                                          delete_status: default
+                                          dic: "2023513470"
+                                          disable_footer: null
+                                          due_warning_subject: null
+                                          due_warning_template: null
+                                          expense_rate: "40.00"
+                                          header_logo: false
+                                          help: "1"
+                                          home_currency: EUR
+                                          ic_dph: SK2023513470
+                                          ico: "46655034"
+                                          ico_raw: "46655034"
+                                          id: "1"
+                                          invoice_comment: null
+                                          invoice_email_subject: null
+                                          invoice_email_template: ""
+                                          invoice_header_comment: null
+                                          invoice_item_limit: "50"
+                                          invoice_items_name: null
+                                          invoice_no_mask: YYYYNNN
+                                          invoice_sequence: "1"
+                                          invoice_sequence_type: yearly
+                                          items_per_page: "50"
+                                          last_login: "2050-01-01"
+                                          modified: "2050-01-01 23:59:59"
+                                          name: null
+                                          newsletter: "0"
+                                          online_payments: false
+                                          payment_thankyou_subject: null
+                                          payment_thankyou_template: null
+                                          phone: ""
+                                          rounding: item
+                                          setup_finished: false
+                                          tax_base: "0.00"
+                                          tax_payer: "1"
+                                          update_taxdate: true
+                                          user_id: "1"
+                                          vat_interval: null
+                                          web: ""
+                                          zip: "811 04"
+                                email: api@example.com
+                                language: slo
+                                user_name: null
+                400:
+                    description: Invalid request
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                error_message: "Invalid request"
+    /users/getUserCompaniesData/{get_all_companies}:
+        get:
+            summary: Get user companies data
+            tags:
+                - Other API commands
+            parameters:
+                - name: get_all_companies
+                  in: path
+                  description: |
+                      Return information about all companies to which user has
+                      access (0=no, 1=yes)
+                  required: true
+                  schema:
+                      type: integer
+                      default: 0
+            responses:
+                200:
+                    description: Successful response
+                    content:
+                        application/json:
+                            example:
+                                data:
+                                    1:
+                                        BankAccount:
+                                            - account: ""
+                                              bank_code: ""
+                                              bank_name: FatraBanka
+                                              country_id: "191"
+                                              created: "2050-01-01 23:59:59"
+                                              currency: null
+                                              default: true
+                                              iban: SK012345678901234567890000
+                                              id: "1"
+                                              modified: "2050-01-01 23:59:59"
+                                              show: true
+                                              swift: SUZUKI
+                                              user_id: "1"
+                                              user_profile_id: "1"
+                                        UserProfile:
+                                            address: Pri Suchom mlyne 6
+                                            business_register: "Obchodný register Okresného súdu Bratislava I, oddiel: Sro, vložka č. 81403/B"
+                                            city: Bratislava - mestská časť Staré Mesto
+                                            company_name: SuperFaktura, s.r.o.
+                                            company_type: ltd
+                                            country_id: "191"
+                                            dic: "2023513470"
+                                            ic_dph: SK2023513470
+                                            ico: "46655034"
+                                            id: "1"
+                                            modified: "2050-01-01 23:59:59"
+                                            phone: ""
+                                            tax_payer: "1"
+                                            user_id: "1"
+                                            web: ""
+                                            zip: "811 04"
+                                error: 0
+                                error_message: ""
+                400:
+                    description: Invalid request
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                error_message: "Invalid request"
+    /sms/send:
+        post:
+            summary: Send SMS reminder
+            tags:
+                - Other API commands
+            requestBody:
+                content:
+                    application/x-www-form-urlencoded:
+                        schema:
+                            type: object
+                            properties:
+                                data:
+                                    type: string
+                                    example: '{"invoice_id":1,"text":"helloworld","phone":"123000456"}'
+            responses:
+                200:
+                    description: Successfully sent SMS
+                    content:
+                        application/json:
+                            example:
+                                data:
+                                    invoice_id: "1275"
+                                    phone: "123000456"
+                                    text: helloworld
+                                error: 0
+                                error_message: SMS sent
+                400:
+                    description: Invalid request
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                error_message: "Invalid request"
+    /accounts/index.json:
+        get:
+            summary: Get bank account moves
+            tags:
+                - Other API commands
+            parameters:
+                - name: direction
+                  in: query
+                  description: Sorting type, ASC or DESC
+                  required: false
+                  schema:
+                      type: string
+                      default: ASC
+                - name: page
+                  in: query
+                  description: Page number
+                  required: false
+                  schema:
+                      type: integer
+                      default: 1
+                - name: per_page
+                  in: query
+                  description: Number of results per page
+                  required: false
+                  schema:
+                      type: integer
+                - name: sort
+                  in: query
+                  description: Sorting attribute
+                  required: false
+                  schema:
+                      type: string
+                - name: amount_from
+                  in: query
+                  description: Amount from
+                  required: false
+                  schema:
+                      type: number
+                      format: float
+                      default: 0
+                - name: amount_to
+                  in: query
+                  description: Amount to
+                  required: false
+                  schema:
+                      type: number
+                      format: float
+                      default: 0
+                - name: date
+                  in: query
+                  description: Constant specifying time filtering
+                  required: false
+                  schema:
+                      type: integer
+                - name: date_since
+                  in: query
+                  description: Date from (requires date:3)
+                  required: false
+                  schema:
+                      type: string
+                      format: date
+                - name: date_to
+                  in: query
+                  description: Date to (requires date:3)
+                  required: false
+                  schema:
+                      type: string
+                      format: date
+                - name: move_type
+                  in: query
+                  description: credit or debit
+                  required: false
+                  schema:
+                      type: string
+                - name: search
+                  in: query
+                  description: Base64 encoded string
+                  required: false
+                  schema:
+                      type: string
+            responses:
+                200:
+                    description: Successfully retrieved bank account moves
+                    content:
+                        application/json:
+                            example:
+                                itemCount: 2
+                                items:
+                                    1:
+                                        account_id: "1"
+                                        account_settings: "1__debet"
+                                        amount: "-117.00"
+                                        client_account: ""
+                                        comment: Platba kartou
+                                        currency: EUR
+                                        date: "2050-01-27"
+                                        documents: []
+                                        error: "Žiadna zhoda podľa sumy"
+                                        from_type: statement
+                                        id: "1"
+                                        text: ""
+                                        token: c3b05c50
+                                        transaction_id: null
+                                        type: without_document
+                                        variable: ""
+                                    2:
+                                        account_id: "1"
+                                        account_settings: "1_DE75512108001245126199_debet"
+                                        amount: "-1000.00"
+                                        client_account: DE75512108001245126199
+                                        comment: Platba kartou
+                                        currency: CZK
+                                        date: "2050-01-28"
+                                        documents: []
+                                        error: "Žiadna zhoda podľa VS"
+                                        from_type: statement
+                                        id: "2"
+                                        text: ""
+                                        token: c3b05c50
+                                        transaction_id: null
+                                        type: without_document
+                                        variable: ""
+                                page: 1
+                                pageCount: 1
+                                perPage: 50
+                400:
+                    description: Invalid request
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                error_message: "Invalid request"
+
+    /stock_items/add:
+        post:
+            summary: Add stock item
+            description: Adds an item to the stock
+            tags:
+                - Stock
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                data:
+                                    type: object
+                                    example:
+                                        StockItem:
+                                            description: "Public description of this item"
+                                            hide_in_autocomplete: 1
+                                            internal_comment: "Secret comment"
+                                            name: "Item B"
+                                            sku: "itemb1241"
+                                            unit: "m"
+                                            unit_price: 19.95
+                                            purchase_unit_price: 10.99
+                                            vat: 20
+                                            watch_stock: 1
+                                        required: true
+            responses:
+                200:
+                    description: Successfully added stock item
+                    content:
+                        application/json:
+                            example:
+                                data:
+                                    StockItem:
+                                        description: Public description of this item
+                                        hide_in_autocomplete: 1
+                                        id: 1
+                                        internal_comment: Secret comment
+                                        name: Item B
+                                        purchase_unit_price: 10.99
+                                        stock: 123
+                                        unit: m
+                                        unit_price: 19.95
+                                        vat: 20
+                                        watch_stock: 1
+                                error: 0
+                                error_message: ""
+                400:
+                    description: Invalid request
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                error_message: "Invalid request"
+    /stock_items/edit/{id}:
+        patch:
+            summary: Edit stock item
+            description: Updates a stock item
+            tags:
+                - Stock
+            parameters:
+                - name: id
+                  in: path
+                  description: Stock item ID
+                  required: true
+                  schema:
+                      type: integer
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                data:
+                                    type: object
+                                    example:
+                                        StockItem:
+                                            name: "Item B"
+                                        required: true
+            responses:
+                200:
+                    description: Successfully updated stock item
+                    content:
+                        application/json:
+                            example:
+                                data:
+                                    StockItem:
+                                        created: "2050-01-01 23:59:59"
+                                        description: Public description of this item
+                                        hide_in_autocomplete: true
+                                        id: 1
+                                        import_id: null
+                                        import_type: null
+                                        internal_comment: Secret comment
+                                        modified: "2050-01-01 23:59:59"
+                                        name: Item B
+                                        purchase_currency: null
+                                        purchase_unit_price: null
+                                        purchase_vat: null
+                                        sku: itemb1241
+                                        stock: 123
+                                        stock_previous: 123
+                                        unit: kg
+                                        unit_price: 19.95
+                                        user_id: "1"
+                                        user_profile_id: "1"
+                                        vat: 20
+                                        watch_stock: true
+                                error: 0
+                                error_message: ""
+                400:
+                    description: Invalid request
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                error_message: "Invalid request"
+    /stock_items/view/{id}:
+        get:
+            summary: View stock item details
+            description: Get details about a stock item
+            tags:
+                - Stock
+            parameters:
+                - name: id
+                  in: path
+                  description: Stock item ID
+                  required: true
+                  schema:
+                      type: integer
+            responses:
+                200:
+                    description: Successfully retrieved stock item details
+                    content:
+                        application/json:
+                            example:
+                                StockItem:
+                                    created: "2050-01-01 23:59:59"
+                                    description: Public description of this item
+                                    hide_in_autocomplete: true
+                                    id: 1
+                                    import_id: null
+                                    import_type: null
+                                    internal_comment: Secret comment
+                                    modified: "2050-01-01 23:59:59"
+                                    name: Item B
+                                    purchase_currency: null
+                                    purchase_unit_price: null
+                                    purchase_vat: null
+                                    sku: itemb1241
+                                    stock: 123
+                                    unit: kg
+                                    unit_price: 19.95
+                                    user_id: "1"
+                                    user_profile_id: "1"
+                                    vat: 20
+                                    watch_stock: true
+                                error: 0
+                                error_message: ""
+                404:
+                    description: Stock item not found
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                error_message: "Stock item not found"
+    
+    # FIXME: non standard path, unable to define
+    /stock_items/index.json[/{ATTRIBUTE}:{VALUE}]*:
+        get:
+            summary: Get list of stock items
+            description: Return a list of stock items
+            tags:
+                - Stock
+            parameters:
+                - name: direction
+                  in: query
+                  description: Sorting type, ASC or DESC
+                  required: false
+                  schema:
+                      type: string
+                      default: ASC
+                - name: listinfo
+                  in: query
+                  description: Show meta information for results (0=no, 1=yes)
+                  required: false
+                  schema:
+                      type: integer
+                      default: 0
+                - name: page
+                  in: query
+                  description: Page number
+                  required: false
+                  schema:
+                      type: integer
+                      default: 1
+                - name: per_page
+                  in: query
+                  description: Number of results per page
+                  required: false
+                  schema:
+                      type: integer
+                - name: price_from
+                  in: query
+                  description: Price from
+                  required: false
+                  schema:
+                      type: number
+                      format: float
+                      default: 0
+                - name: price_to
+                  in: query
+                  description: Price to
+                  required: false
+                  schema:
+                      type: number
+                      format: float
+                      default: 0
+                - name: search
+                  in: query
+                  description: Base64 encoded string
+                  required: false
+                  schema:
+                      type: string
+                - name: sku
+                  in: query
+                  description: Search by SKU (base64 encoded string)
+                  required: false
+                  schema:
+                      type: string
+                - name: sort
+                  in: query
+                  description: Sorting attribute
+                  required: false
+                  schema:
+                      type: string
+                - name: status
+                  in: query
+                  description: If 1, shows only items that are in stock
+                  required: false
+                  schema:
+                      type: integer
+            responses:
+                200:
+                    description: Success with listing information
+                    content:
+                        application/json:
+                            schema:
+                                allOf:
+                                  - $ref: "#/components/schemas/Paging"
+                                  - type: object
+                                    properties:
+                                        itemCount:
+                                            type: integer
+                                        items: 
+                                            type: array
+                                            properties:
+                                                StockItem: 
+                                                    $ref: "#/components/schemas/StockItem"
+                400:
+                    description: Invalid request
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                error_message: Invalid request
+
+    /tags/add:
+        post:
+            summary: Add tag
+            description: Adds a new tag
+            tags:
+                - Tags
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                data:
+                                    type: object
+                                    properties:
+                                        name:
+                                            type: string
+                                    required:
+                                        - name
+                            required:
+                                - data
+            responses:
+                201:
+                    description: Successfully added tag
+                    content:
+                        application/json:
+                            example:
+                                error: 0
+                                message: Tag bol uložený
+                                tag_id: "1"
+                                tag_name: abc
+                403:
+                    description: Insufficient privileges
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                error_message: Nemôžete pridávať tagy
+                                message: Nemôžete pridávať tagy
+                409:
+                    description: Duplicate name
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                error_message: Tento tag už existuje
+                                message: Tento tag už existuje
+                400:
+                    description: Wrong data
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                error_message: Chýbajúce údaje
+                                message: Chýbajúce údaje
+    /tags/edit/{id}:
+        post:
+            summary: Edit tag
+            description: Updates a tag
+            tags:
+                - Tags
+            parameters:
+                - name: id
+                  in: path
+                  description: Tag ID
+                  required: true
+                  schema:
+                      type: integer
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                data:
+                                    type: object
+                                    properties:
+                                        name:
+                                            type: string
+                                    required:
+                                        - name
+                            required:
+                                - data
+            responses:
+                200:
+                    description: Successfully edited tag
+                    content:
+                        application/json:
+                            example:
+                                error: 0
+                                message: Tag bol uložený
+                                tag_id: "1"
+                404:
+                    description: Wrong tag
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                error_message: Žiadny tag sa nenašiel
+                                message: Žiadny tag sa nenašiel
+                400:
+                    description: Bad data
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                error_message: Chýbajúce údaje
+                                message: Chýbajúce údaje
+                403:
+                    description: Insufficient privileges
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                error_message: Nemôžete editovať tagy
+                                message: Nemôžete editovať tagy
+    /tags/index.json:
+        get:
+            summary: Get list of tags
+            description: Returns a list of tags
+            tags:
+                - Tags
+            responses:
+                200:
+                    description: Successfully retrieved list of tags
+                    content:
+                        application/json:
+                            example:
+                                1: "abc"
+                403:
+                    description: Insufficient privileges
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                error_message: Nemôžete zobrazovať tagy
+                                message: Nemôžete zobrazovať tagy
+    /tags/delete/{id}:
+        get:
+            summary: Delete tag
+            description: Deletes a tag
+            tags:
+                - Tags
+            parameters:
+                - name: id
+                  in: path
+                  description: Tag ID
+                  required: true
+                  schema:
+                      type: integer
+            responses:
+                200:
+                    description: Successfully deleted tag
+                    content:
+                        application/json:
+                            example:
+                                error: 0
+                                message: Tag zmazaný
+                404:
+                    description: Wrong tag
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                error_message: Žiadny tag sa nenašiel
+                                message: Žiadny tag sa nenašiel
+                403:
+                    description: Insufficient privileges
+                    content:
+                        application/json:
+                            example:
+                                error: 1
+                                error_message: Nemôžete mazať tagy
+                                message: Nemôžete mazať tagy
+
+    /countries:
+        get:
+            summary: Get list of countries
+            description: |
+                Get a list of countries in `id: country_name` format.
+                You can request more information (`iso`, `eu`).
+            tags:
+                - Value lists
+            parameters:
+                - name: Authorization
+                  in: header
+                  description: API key for authentication
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                200:
+                    description: Successful response
+                    content:
+                        application/json:
+                            example:
+                                1: Afganistan
+                                10: Argentina
+                                100: Iceland
+    /countries/index/view_full:1:
+        get:
+            summary: Get detailed list of countries
+            description: |
+                Get a detailed list of countries with additional information.
+            tags:
+                - Value lists
+            operationId: getDetailedCountries
+            parameters:
+                - name: Authorization
+                  in: header
+                  description: API key for authentication
+                  required: true
+                  schema:
+                      type: string
+                - name: view_full
+                  in: path
+                  description: Flag to view additional information
+                  required: true
+                  schema:
+                      type: integer
+            responses:
+                200:
+                    description: Successful response
+                    content:
+                        application/json:
+                            example:
+                                - Country:
+                                      eu: true
+                                      id: 191
+                                      iso: sk
+                                      name: Slovensko
+                                - Country:
+                                      eu: false
+                                      id: 1
+                                      iso: af
+                                      name: Afganistan
+    /currencies:
+        get:
+            summary: Get list of currencies
+            description: |
+                Get a list of currencies in ISO-4217 format.
+            tags:
+                - Value lists
+            parameters:
+                - name: Authorization
+                  in: header
+                  description: API key for authentication
+                  required: true
+                  schema:
+                      type: string
+            responses:
+                200:
+                    description: Successful response
+                    content:
+                        application/json:
+                            example:
+                                AED: Uae Dirham
+                                AFN: Afghani
+                                ALL: Albanian lek
+                                # ... (truncated for brevity)
+
+components:
+    securitySchemes:
+        SFAPI:
+            type: apiKey
+            in: header
+            name: Authorization
+            description: |
+                SuperFaktura API key authentication.
+
+                **Authentication Header:**
+                ```
+                Authorization: SFAPI email=YOUR@EMAIL.TLD&apikey=YOURTOKEN&module=MODULE&company_id=YOUR_COMPANY_ID
+                ```
+
+                **Parameters:**
+                - `email` (required): Your email address registered with SuperFaktura. URL encoded.
+                - `apikey` (required): Your API key obtained from SuperFaktura. URL encoded.
+                - `module` (required): The module of the API being accessed. URL encoded. If using a 3rd party module, specify its name (e.g., `WordPress 5.2.3 (WC 3.8.0, WC SF 1.9.17)`).
+                - `company_id` (optional): ID of your company associated with the API key. URL encoded.
+
+                **Values and Sources:**
+                - `email`, `apikey`, and `company_id` can be found in your SuperFaktura account (*Tools > API access*).
+                - If making your own module, use a descriptive name for `module`.
+
+                **User Recommendation:**
+                - We recommend creating a dedicated API user with Administrator role in SuperFaktura (*Settings > Users*).
+
+                **Additional Resources:**
+                - [API access (Production)](https://moja.superfaktura.sk/api_access)
+                - [API access (Sandbox)](https://sandbox.superfaktura.sk/api_access)
+                - [Documentation](https://github.com/superfaktura/docs/blob/master/intro.md#authentication)
+
+    schemas:
+        StockItem:
+            type: object
+            properties:
+                created:
+                    type: string
+                    format: date-time
+                    description: date and time of creation
+                description:
+                    type: string
+                    description: item description (is displayed on invoice)
+                hide_in_autocomplete:
+                    type: boolean
+                    nullable: true
+                    description: hide in autocomplete (null = no)
+                id:
+                    type: integer
+                    description: item ID
+                import_id:
+                    type: integer
+                    nullable: true
+                    description: import ID (if is not from import = null)
+                import_type:
+                    type: string
+                    nullable: true
+                    description: import type ('efaktury' or `null`)
+                internal_comment:
+                    type: string
+                    description: internal comment (isn't displayed on invoice)
+                modified:
+                    type: string
+                    format: date-time
+                    description: date and time of modification
+                name:
+                    type: string
+                    description: item name
+                sku:
+                    type: string
+                    description: stock item identifier (e.g. ABC123)
+                stock:
+                    type: number
+                    format: float
+                    description: number of items in stock
+                unit:
+                    type: string
+                    description: unit (e.g. ks, kg)
+                unit_price:
+                    type: number
+                    format: float
+                    description: unit price
+                user_id:
+                    type: integer
+                    description: user ID
+                user_profile_id:
+                    type: integer
+                    description: user profile ID
+                vat:
+                    type: number
+                    format: float
+                    description: VAT in percent (e.g. 20)
+                watch_stock:
+                    type: boolean
+                    description: track inventory level
+
+        BankAccount:
+            type: object
+            properties:
+                bank_account:
+                    type: string
+                    description: Bank account number (CZ)
+                bank_name:
+                    type: string
+                    description: The name of the bank
+                bank_code:
+                    type: string
+                    description: Bank code (CZ)
+                default:
+                    type: integer
+                    description: |
+                        Indicates if the bank account is the default.
+                        Will overwrite previous default account if set to 1.
+                        (0=no, 1=yes)
+                iban:
+                    type: string
+                    description: International Bank Account Number (IBAN)
+                show:
+                    type: integer
+                    description: |
+                        Indicates if the bank account should be shown on
+                        documents. (0=no, 1=yes)
+                swift:
+                    type: string
+                    description: SWIFT code
+        BankAccountReq:
+            type: object
+            allOf:
+                - $ref: "#/components/schemas/BankAccount"
+                - required:
+                    - bank_name
+                    - iban
+                    - swift
+                    - bank_account
+                    - bank_code
+                - properties:
+                        show_account:
+                            type: integer
+                            description: |
+                                Indicates if the bank account details (account number
+                                and bank code) should be shown on documents.
+                                (0=no,1=yes)
+                
+        BankAccountRes:
+            type: object
+            allOf:
+                - $ref: "#/components/schemas/BankAccount"
+                - properties:
+                    id:
+                        type: string
+                    country_id:
+                        type: string
+                    created:
+                        type: string
+                    modified:
+                        type: string
+                    user_id:
+                        type: string
+                    user_profile_id:
+                        type: string
+
+        CashRegister:
+            type: object
+            properties:
+                currency:
+                    type: string
+                    description: The currency of the cash register
+                description:
+                    type: string
+                    description: Description of the cash register
+                id:
+                    type: string
+                    description: Unique identifier for the cash register
+                id_provoz:
+                    type: string
+                    description: Provoz ID associated with the cash register
+                name:
+                    type: string
+                    description: Name of the cash register
+                sequence_in_no:
+                    type: string
+                    description: Sequence number for incoming transactions
+                sequence_out_no:
+                    type: string
+                    description: Sequence number for outgoing transactions
+                sequencein_id:
+                    type: string
+                    description: Sequence ID for incoming transactions
+                sequenceout_id:
+                    type: string
+                    description: Sequence ID for outgoing transactions
+                total:
+                    type: string
+                    format: float
+                    description: Total amount in the cash register
+                user_id:
+                    type: string
+                    description: User ID associated with the cash register
+                user_profile_id:
+                    type: string
+                    description: User profile ID associated with the cash register
+
+        Expense:
+            type: object
+            properties:
+                id:
+                    type: number
+                name:
+                    type: string
+
+        EetCertificate:
+            type: object
+            properties:
+                created:
+                    type: string
+                    format: date-time
+                    description: Datetime when the EET certificate was created
+                dic:
+                    type: string
+                    description: DIC (VAT ID) associated with the EET certificate
+                hash:
+                    type: string
+                    description: Hash associated with the EET certificate
+                id:
+                    type: string
+                    description: Unique identifier for the EET certificate
+                modified:
+                    type: string
+                    format: date-time
+                    description: Datetime when the EET certificate was modified
+                name:
+                    type: string
+                    description: Name of the EET certificate
+                private_key:
+                    type: string
+                    description: Private key associated with the EET certificate
+                public_key:
+                    type: string
+                    description: Public key associated with the EET certificate
+                user_profile_id:
+                    type: string
+                    description: User profile ID associated with the EET certificate
+                valid_from:
+                    type: string
+                    format: date-time
+                    description: Validity start date of the EET certificate
+                valid_to:
+                    type: string
+                    format: date-time
+                    description: Validity end date of the EET certificate
+
+        EetReceipt:
+            type: object
+            properties:
+                amount:
+                    type: number
+                    description: Amount of the EET receipt
+                bkp:
+                    type: string
+                    description: BKP (Bezpečnostní kód poplatníka) associated with the EET receipt
+                cash_register_id:
+                    type: string
+                    description: Cash register ID associated with the EET receipt
+                celk_trzba:
+                    type: number
+                    description: Total revenue from the EET receipt
+                cerp_zuct:
+                    type: number
+                    description: Cerp zuct (Credit) associated with the EET receipt
+                cest_sluz:
+                    type: number
+                    description: Cest sluz (Travel expenses) associated with the EET receipt
+                chyba:
+                    type: string
+                    description: Error message associated with the EET receipt
+                created:
+                    type: string
+                    format: date-time
+                    description: Datetime when the EET receipt was created
+                currency:
+                    type: string
+                    description: Currency of the EET receipt
+                dan1:
+                    type: number
+                    description: Dan1 (Tax 1) associated with the EET receipt
+                dan2:
+                    type: number
+                    description: Dan2 (Tax 2) associated with the EET receipt
+                dan3:
+                    type: number
+                    description: Dan3 (Tax 3) associated with the EET receipt
+                dat_trzby:
+                    type: string
+                    format: date-time
+                    description: Datetime of the EET transaction
+                dat_trzby_internal:
+                    type: string
+                    format: date
+                    description: Internal date of the EET transaction
+                data:
+                    type: string
+                    description: JSON data associated with the EET receipt
+                dic_popl:
+                    type: string
+                    description: DIC poplatnika (VAT ID of the payer) associated with the EET receipt
+                dic_poverujiciho:
+                    type: string
+                    description: DIC poverujiciho (Authorized VAT ID) associated with the EET receipt
+                exchange_rate:
+                    type: number
+                    description: Exchange rate associated with the EET receipt
+                id:
+                    type: string
+                    description: Unique identifier for the EET receipt
+                id_pokl:
+                    type: string
+                    description: ID of the point of sale associated with the EET receipt
+                id_provoz:
+                    type: string
+                    description: Provoz ID associated with the EET receipt
+                kod:
+                    type: number
+                    description: Kod (Code) associated with the EET receipt
+                modified:
+                    type: string
+                    format: date-time
+                    description: Datetime when the EET receipt was modified
+                pkp:
+                    type: string
+                    description: PKP (Podpis kontrolniho dokumentu) associated with the EET receipt
+                porad_cis:
+                    type: string
+                    description: Porad cis (Order number) associated with the EET receipt
+                pouzit_zboz1:
+                    type: number
+                    description: Pouzite zbozi 1 (Used goods 1) associated with the EET receipt
+                pouzit_zboz2:
+                    type: number
+                    description: Pouzite zbozi 2 (Used goods 2) associated with the EET receipt
+                pouzit_zboz3:
+                    type: number
+                    description: Pouzite zbozi 3 (Used goods 3) associated with the EET receipt
+                prvni_zaslani:
+                    type: boolean
+                    description: Indicates if it's the first transmission
+                rezim:
+                    type: number
+                    description: Rezim (Mode) associated with the EET receipt
+                upid:
+                    type: string
+                    description: UPID associated with the EET receipt
+                urceno_cerp_zuct:
+                    type: number
+                    description: Urceno cerp zuct (Credit designated) associated with the EET receipt
+                user_id:
+                    type: string
+                    description: User ID associated with the EET receipt
+                user_profile_id:
+                    type: string
+                    description: User profile ID associated with the EET receipt
+                uuid_zpravy:
+                    type: string
+                    description: UUID of the message associated with the EET receipt
+                zakl_dan1:
+                    type: number
+                    description: Zakl dan1 (Base tax 1) associated with the EET receipt
+                zakl_dan2:
+                    type: number
+                    description: Zakl dan2 (Base tax 2) associated with the EET receipt
+                zakl_dan3:
+                    type: number
+                    description: Zakl dan3 (Base tax 3) associated with the EET receipt
+                zakl_nepodl_dph:
+                    type: number
+                    description: |
+                        Zakl nepodl DPH (Base not subject to VAT) associated
+                        with the EET receipt
+
+        SummaryRes:
+            description: Summary of the cash register item deletion
+            type: object
+            properties:
+                minus:
+                    type: object
+                    properties:
+                        formatted:
+                            type: number
+                            description: Formatted representation of minus value
+                        value:
+                            type: number
+                            description: Minus value (null if not present)
+                plus:
+                    type: object
+                    properties:
+                        formatted:
+                            type: string
+                            description: Formatted representation of plus value
+                        value:
+                            type: string
+                            description: Plus value
+                total:
+                    type: object
+                    properties:
+                        formatted:
+                            type: string
+                            description: Formatted representation of total value
+                        value:
+                            type: string
+                            description: Total value
+        Summary:
+            type: object
+            properties:
+                discount:
+                    type: number
+                    description: Discount value (1.2)
+                invoice_total:
+                    type: number
+                    description: Total amount of the invoice (10.8)
+                vat_base_separate:
+                    type: object
+                    description: Separate VAT base amounts for different rates
+                    properties:
+                        20:
+                            type: number
+                            description: VAT base amount for the rate of 20% (9)
+                vat_base_total:
+                    type: number
+                    description: Total VAT base amount (9)
+                vat_separate:
+                    type: object
+                    description: Separate VAT amounts for different rates
+                    properties:
+                        20:
+                            type: number
+                            description: VAT amount for the rate of 20% (1.8)
+                vat_total:
+                    type: number
+                    description: Total VAT amount (1.8)
+        
+        Paging:
+            type: object
+            properties:
+                page:
+                    type: number
+                    description: Page number
+                pageCount:
+                    type: number
+                    description: Number of pages
+                perPage:
+                    type: number
+                    description: Number of items per page
+
+        CashRegisterRes:
+            type: object
+            allOf:
+              - $ref: "#/components/schemas/CashRegisterItem"
+              - $ref: "#/components/schemas/Paging"
+              - properties:
+                    CashRegister:
+                        $ref: "#/components/schemas/CashRegister"
+                    error:
+                        type: string
+                    itemCount:
+                        type: number
+                    items:
+                        type: array
+                        properties:
+                            0:
+                                properties:
+                                    has_storno:
+                                        type: string
+                            CashRegisterItem:
+                                $ref: "#/components/schemas/CashRegisterItem"
+                            Summary:
+                                $ref: "#/components/schemas/Summary"
+                            EetReceipt:
+                                $ref: "#/components/schemas/EetReceipt"
+                            Expense:
+                                $ref: "#/components/schemas/Expense"
+                            Invoice:
+                                $ref: "#/components/schemas/Invoice"
+
+        CashRegisterItemReq:
+            type: object
+            allOf:
+                - $ref: "#/components/schemas/CashRegisterItem"
+
+        CashRegisterItemRes:
+            type: object
+            allOf:
+                - $ref: "#/components/schemas/CashRegisterItem"
+                - properties:
+                    error:
+                        type: string
+                    itemCount:
+                        type: number
+                    items:
+                        type: array
+                        properties:
+                            CashRegisterItem:
+                                $ref: "#/components/schemas/CashRegisterItem"
+                            Summary:
+                                $ref: "#/components/schemas/Summary"
+                            EetReceipt:
+                                $ref: "#/components/schemas/EetReceipt"
+                            Expense:
+                                $ref: "#/components/schemas/Expense"
+                            Invoice:
+                                $ref: "#/components/schemas/Invoice"
+                            0:
+                                properties:
+                                    has_storno:
+                                        type: string
+                    flag:
+                        type: string
+                    status:
+                        type: string
+
+        CashRegisterItem:
+            type: object
+            required:
+                - amount
+                - cash_register_id
+            properties:
+                amount:
+                    type: number
+                    format: float
+                    description: |
+                        Amount of money. Positive values indicate adding to the
+                        cash register, while negative values indicate removing
+                        from the cash register.
+                cash_register_id:
+                    type: integer
+                    description: Cash register ID
+                client_id:
+                    type: integer
+                    description: |
+                        Client ID to whom the payment is made or received
+                cash_item_no_formatted:
+                    type: string
+                    description: Formatted cash item number
+                client_name:
+                    type: string
+                    description: |
+                        Client name to whom the payment is made or received
+                created:
+                    type: string
+                    format: date-time
+                    description: |
+                        Datetime when the cash register item was created
+                currency:
+                    type: string
+                    description: Currency of the transaction
+                description:
+                    type: string
+                    description: |
+                        Description of the cash register item
+                expense_id:
+                    type: integer
+                    description: |
+                        Expense ID associated with the cash register item
+                invoice_id:
+                    type: integer
+                    description: |
+                        Invoice ID associated with the cash register item
+                is_eet:
+                    type: integer
+                    description: |
+                        Indicates if the movement is part of the EET system.
+                        (0=no, 1=yes)
+
+        Client:
+            type: object
+            required:
+                - name
+            properties:
+                account:
+                    # TODO: check
+                    type: string
+                address:
+                    type: string
+                    description: Address (street + number)
+                bank_account:
+                    type: string
+                    description: Bank account
+                city:
+                    type: string
+                    description: City
+                comment:
+                    type: string
+                    description: Comment
+                country:
+                    type: string
+                    description: Custom country name
+                country_id:
+                    type: integer
+                    description: Country ID (see Value lists > Country list)
+                country_iso_id:
+                    type: string
+                    description: Country code (ISO-3166-1 Alpha-2)
+                delivery_address:
+                    type: string
+                    description: Delivery address (street + number)
+                delivery_city:
+                    type: string
+                    description: Delivery city
+                delivery_country:
+                    type: string
+                    description: Custom delivery country name
+                delivery_country_id:
+                    type: integer
+                    description: Delivery country ID (see Value lists > Country list)
+                delivery_country_iso_id:
+                    type: string
+                    description: Country code (ISO-3166-1 Alpha-2)
+                delivery_name:
+                    type: string
+                    description: Delivery country name
+                delivery_phone:
+                    type: string
+                    description: Delivery phone number
+                delivery_zip:
+                    type: string
+                    description: Delivery ZIP code
+                dic:
+                    type: string
+                    description: Tax ID (DIČ-sk)
+                email:
+                    type: string
+                    description: Email
+                fax:
+                    type: string
+                    description: Fax
+                iban:
+                    type: string
+                    description: IBAN
+                ic_dph:
+                    type: string
+                    description: VAT ID (IČ DPH🇸🇰, DIČ-cz)
+                ico:
+                    type: string
+                    description: ID (IČO)
+                match_address:
+                    type: integer
+                    description: |
+                        If set, the address is included in client searching
+                        (0=no, 1=true)
+                name:
+                    type: string
+                phone:
+                    type: string
+                    description: Phone number
+                swift:
+                    type: string
+                    description: SWIFT code
+                update_addressbook:
+                    type: integer
+                    description: Update client data when the invoice is issued? (0=no, 1=true)
+                zip:
+                    type: string
+                    description: ZIP code
+
+        ClientData:
+            type: object
+            properties:
+                Country:
+                    type: object
+                    properties:
+                        eu:
+                            type: boolean
+                            description: European Union membership status
+                        id:
+                            type: integer
+                            description: Country ID
+                        iso:
+                            type: string
+                            description: ISO country code
+                        name:
+                            type: string
+                            description: Country name
+                DeliveryCountry:
+                    type: object
+                    properties:
+                        eu:
+                            type: boolean
+                            description: European Union membership status
+                        id:
+                            type: integer
+                            description: Delivery country ID
+                        iso:
+                            type: string
+                            description: ISO delivery country code
+                        name:
+                            type: string
+                            description: Delivery country name
+                account:
+                    type: string
+                    description: Account information
+                address:
+                    type: string
+                    description: Client address
+                bank_account:
+                    type: string
+                    description: Bank account information
+                bank_account_id:
+                    type: string
+                    description: Bank account ID
+                bank_account_prefix:
+                    type: string
+                    description: Bank account prefix
+                bank_code:
+                    type: string
+                    description: Bank code
+                city:
+                    type: string
+                    description: City
+                comment:
+                    type: string
+                    description: Client comment
+                country:
+                    type: string
+                    description: Country
+                country_id:
+                    type: string
+                    description: Country ID
+                created:
+                    type: string
+                    format: date-time
+                    description: Creation date
+                currency:
+                    type: string
+                    description: Currency information
+                default_variable:
+                    type: string
+                    description: Default variable
+                delivery_address:
+                    type: string
+                    description: Delivery address
+                delivery_city:
+                    type: string
+                    description: Delivery city
+                delivery_country:
+                    type: string
+                    description: Delivery country
+                delivery_country_id:
+                    type: string
+                    description: Delivery country ID
+                delivery_name:
+                    type: string
+                    description: Delivery name
+                delivery_phone:
+                    type: string
+                    description: Delivery phone
+                delivery_state:
+                    type: string
+                    description: Delivery state
+                delivery_zip:
+                    type: string
+                    description: Delivery ZIP code
+                dic:
+                    type: string
+                    description: Tax ID (DIČ-sk)
+                discount:
+                    type: string
+                    description: Discount information
+                distance:
+                    type: string
+                    description: Distance information
+                dont_travel:
+                    type: string
+                    description: Travel restriction information
+                due_date:
+                    type: string
+                    description: Due date
+                email:
+                    type: string
+                    description: Email
+                fax:
+                    type: string
+                    description: Fax
+                iban:
+                    type: string
+                    description: IBAN
+                ic_dph:
+                    type: string
+                    description: VAT ID (IČ DPH🇸🇰, DIČ-cz)
+                ico:
+                    type: string
+                    description: ID (IČO)
+                id:
+                    type: string
+                    description: Client ID
+                modified:
+                    type: string
+                    format: date-time
+                    description: Last modification date
+                name:
+                    type: string
+                    description: Client name
+                notices:
+                    type: boolean
+                    description: Notices status
+                phone:
+                    type: string
+                    description: Phone
+                state:
+                    type: string
+                    description: State information
+                swift:
+                    type: string
+                    description: SWIFT code
+                tags:
+                    type: string
+                    description: Tags information
+                user_id:
+                    type: string
+                    description: User ID
+                user_profile_id:
+                    type: string
+                    description: User profile ID
+                uuid:
+                    type: string
+                    description: UUID
+                zip:
+                    type: string
+                    description: ZIP code
+
+        Logo:
+            type: object
+            properties:
+                alternative:
+                    type: string
+                    description: Alternative information
+                basename:
+                    type: string
+                    description: Basename of the logo file
+                checksum:
+                    type: string
+                    description: Checksum of the logo file
+                created:
+                    type: string
+                    format: date-time
+                    description: Creation date
+                default:
+                    type: boolean
+                    description: Default logo status
+                delete_flag:
+                    type: boolean
+                    description: Deletion flag
+                dirname:
+                    type: string
+                    description: Directory name of the logo file
+                extern_file:
+                    type: string
+                    description: External file information
+                foreign_key:
+                    type: string
+                    description: Foreign key
+                group:
+                    type: string
+                    description: Logo group
+                id:
+                    type: string
+                    description: Logo ID
+                mobile_path:
+                    type: string
+                    description: Mobile path information
+                model:
+                    type: string
+                    description: Model information
+                modified:
+                    type: string
+                    format: date-time
+                    description: Last modification date
+                path:
+                    type: string
+                    description: Path to the logo file
+                size:
+                    type: string
+                    description: Size of the logo file
+
+        MyData:
+            type: object
+            properties:
+                address:
+                    type: string
+                    description: My address
+                business_register:
+                    type: string
+                    description: Business register
+                city:
+                    type: string
+                    description: My city
+                company_name:
+                    type: string
+                    description: My company name
+                country_id:
+                    type: string
+                    description: Country ID (see Value lists > Country list)
+                dic:
+                    type: string
+                    description: Tax ID (DIČ-sk)
+                ic_dph:
+                    type: string
+                    description: VAT ID (IČ DPH🇸🇰, DIČ-cz)
+                update_profile:
+                    type: integer
+                    description: Should the profile be updated with these data
+                zip:
+                    type: string
+                    description: ZIP code
+
+        Invoice:
+            type: object
+            properties:
+                add_rounding_item:
+                    type: integer
+                    description: Add rounding item to invoice (EUR is rounded to 5 cents and CZK is rounded to integer) (0=no, 1=yes)
+                    default: 0
+                already_paid:
+                    type: integer
+                    description: Is invoice already paid (0=no, 1=yes)
+                bank_accounts:
+                    type: array
+                    description: List of bank accounts
+                comment:
+                    type: string
+                    description: Comment
+                constant:
+                    type: string
+                    description: Constant symbol
+                created:
+                    type: string
+                    format: date
+                    description: Issue date
+                delivery:
+                    type: string
+                    format: date
+                    description: Delivery date
+                delivery_type:
+                    type: string
+                    description: Delivery type (see Value lists > Delivery types)
+                deposit:
+                    type: number
+                    format: float
+                    description: Deposit paid
+                discount:
+                    type: number
+                    format: float
+                    description: Discount in percent
+                    default: 0
+                discount_total:
+                    type: number
+                    format: float
+                    description: Nominal discount, is used only if `discount` is *not* set
+                due:
+                    type: string
+                    format: date
+                    description: Due date
+                estimate_id:
+                    type: integer
+                    description: Estimate ID, based on which the invoice is issued
+                header_comment:
+                    type: string
+                    description: Comment above invoice items
+                internal_comment:
+                    type: string
+                    description: Internal comment - will not be displayed on the invoice
+                invoice_currency:
+                    type: string
+                    description: Currency (see Value lists > Currencies)
+                invoice_no_formatted:
+                    type: string
+                    description: Invoice number
+                issued_by:
+                    type: string
+                    description: Who issued the invoice (person)
+                issued_by_email:
+                    type: string
+                    description: Who issued the invoice (email)
+                issued_by_phone:
+                    type: string
+                    description: Who issued the invoice (phone)
+                issued_by_web:
+                    type: string
+                    description: Website displayed on the invoice
+                logo_id:
+                    type: integer
+                    description: Logo ID
+                mark_sent:
+                    type: integer
+                    description: Mark invoice as sent via email (0=no, 1=yes)
+                mark_sent_message:
+                    type: string
+                    description: Set mail message for _mark_sent_ flag
+                mark_sent_subject:
+                    type: string
+                    description: Set mail subject for _mark_sent_ flag
+                name:
+                    type: string
+                    description: Invoice name
+                order_no:
+                    type: string
+                    description: Order number
+                parent_id:
+                    type: integer
+                    description: Invoice ID, that we want to cancel
+                paydate:
+                    type: string
+                    format: date-time
+                    description: Payment date (if set together with `already_paid=1`, the set date will be used)
+                payment_type:
+                    type: string
+                    description: Payment type (see Value lists > Payment types)
+                proforma_id:
+                    type: string
+                    description: Proforma invoice ID, based on which a regular invoice is issued. Invoice will get information about the paid invoice
+                rounding:
+                    type: string
+                    description: Rounding type (see Value lists > Rounding types)
+                sequence_id:
+                    type: integer
+                    description: Sequence ID (see Value lists > Sequences)
+                specific:
+                    type: string
+                    description: Specific symbol
+                tax_document:
+                    type: integer
+                    description: Is there a receipt? (For correct connection with the proforma invoice, it is necessary to fill `proforma_id`) (0=no, 1=yes)
+                type:
+                    type: string
+                    description: Invoice type (see Value lists > Invoice types)
+                variable:
+                    type: string
+                    description: Variable symbol (if left empty, the invoice number will be used)
+                vat_transfer:
+                    type: integer
+                    description: VAT reverse charge (0=no, 1=yes)
+
+        InvoiceItem:
+            type: object
+            properties:
+                description:
+                    type: string
+                    description: Invoice item description - will be displayed on the invoice
+                discount:
+                    type: number
+                    format: float
+                    description: Discount in percent
+                    default: 0
+                discount_description:
+                    type: string
+                    description: Discount description
+                load_data_from_stock:
+                    type: integer
+                    description: Load data from stock? (0=no, 1=yes)
+                    default: 0
+                name:
+                    type: string
+                    description: Item name
+                quantity:
+                    type: number
+                    format: float
+                    description: Quantity
+                    default: 1
+                sku:
+                    type: string
+                    description: Stock number
+                stock_item_id:
+                    type: integer
+                    description: Stock item ID
+                tax:
+                    type: number
+                    format: float
+                    description: VAT (if you are not a tax payer, use 0)
+                unit:
+                    type: string
+                    description: Unit (e.g. m, l, hour)
+                unit_price:
+                    type: number
+                    format: float
+                    description: Price without VAT (or full price, if you are not a tax payer)
+                    default: 0
+                use_document_currency:
+                    type: integer
+                    description: Convert stock item to invoice currency (1 = enabled, 0 = disabled)
+
+        InvoiceEmail:
+            type: object
+            properties:
+                invoice_id:
+                    type: integer
+                    description: ID of the invoice
+                email:
+                    type: string
+                    format: email
+                    description: Email address of the recipient
+                subject:
+                    type: string
+                    description: Subject of the email
+                message:
+                    type: string
+                    description: Email message body
+
+        InvoiceSettings:
+            type: object
+            properties:
+                bysquare:
+                    type: boolean
+                    description: Show pay by square
+                callback_payment:
+                    type: string
+                    description: >
+                        URL, which will be automatically called after adding payment to the invoice.
+                        GET parameter `invoice_id` will be appended to the URL.
+                        If you send URL `https://example.com/callback/`,
+                        the callback URL for invoice_id 123 will be
+                        `https://example.com/callback/?invoice_id=123`
+                        or `https://example.com/callback/?invoice_id=123&secret_key={KEY}`.
+                        Parameter `secret_key` can be part of sent URL
+                        (`https://example.com/callback/?secret_key=SECRET-KEY`)
+                        or set in your profile.
+                language:
+                    type: string
+                    description: >
+                        Invoice language (for a list of possible values see Value lists > Language list)
+                online_payment:
+                    type: boolean
+                    description: Show online payments
+                payment_info:
+                    type: boolean
+                    description: Show payment information
+                paypal:
+                    type: boolean
+                    description: Show PayPal
+                show_prices:
+                    type: boolean
+                    description: Show prices (only effective for delivery)
+                signature:
+                    type: boolean
+                    description: Show signature
+                summary_bg_color:
+                    type: string
+                    description: >
+                        Summary boxes color - has to be in format `#rrggbb`,
+                        where `rr`, `gg`, and `bb` are hexadecimal (`00`-`FF`)
+
+        InvoiceExtra:
+            type: object
+            properties:
+                custom_payment_link:
+                    type: string
+                    description: >
+                        Sets a custom link for the payment button.
+                        Is prioritized over other options (e.g., Barion, Besteron).
+                        Automatically enables online payments for the invoice.
+                        This behavior can be disabled by sending `online_payment: false` in InvoiceSettings.
+                dimension:
+                    type: string
+                    description: Package dimensions in cm (l x w x h)
+                insurance:
+                    type: number
+                    format: float
+                    description: Insurance price
+                oss:
+                    type: boolean
+                    description: One-stop shop
+                parcel_count:
+                    type: integer
+                    description: Number of packages
+                pickup_point_id:
+                    type: integer
+                    description: Pickup point ID for Zásielkovňa
+                tracking_number:
+                    type: string
+                    description: Tracking number
+                weight:
+                    type: number
+                    format: float
+                    description: Package weight
+
+        InvoicePayment:
+            type: object
+            properties:
+                invoice_id:
+                    type: integer
+                    description: Invoice ID
+                payment_type:
+                    type: string
+                    description: Payment type
+                amount:
+                    type: number
+                    format: float
+                    description: Payment amount
+                created:
+                    type: string
+                    format: date
+                    description: Payment creation date
+                currency:
+                    type: string
+                    description: Payment currency
+
+        Signature:
+            type: object
+            properties:
+                alternative:
+                    type: string
+                    description: Alternative value (null)
+                basename:
+                    type: string
+                    description: Basename of the signature image
+                checksum:
+                    type: string
+                    description: Checksum of the signature image
+                created:
+                    type: string
+                    format: date-time
+                    description: Date and time of creation
+                default:
+                    type: boolean
+                    description: Boolean indicating if it is the default signature
+                delete_flag:
+                    type: boolean
+                    description: Boolean indicating if the signature is marked for deletion
+                dirname:
+                    type: string
+                    description: Directory name ('img')
+                extern_file:
+                    type: string
+                    description: External file indicator ('0')
+                foreign_key:
+                    type: string
+                    description: Foreign key value ('1')
+                group:
+                    type: string
+                    description: Group name ('signature')
+                id:
+                    type: string
+                    description: Unique identifier for the signature
+                model:
+                    type: string
+                    description: Model name ('User')
+                modified:
+                    type: string
+                    format: date-time
+                    description: Date and time of modification
+                path:
+                    type: string
+                    description: Path to the signature image ('img/9b7c9830cb6b6afa7b16_1_podpis_1.png')
+                size:
+                    type: string
+                    description: Size of the signature image ('2689')
+
+        SummaryInvoice:
+            type: object
+            properties:
+                vat_base_separate_negative:
+                    type: object
+                    description: Separate negative VAT base amounts for different rates
+                    properties:
+                        20:
+                            type: number
+                            description: Negative VAT base amount for the rate of 20% (0)
+                vat_base_separate_positive:
+                    type: object
+                    description: Separate positive VAT base amounts for different rates
+                    properties:
+                        20:
+                            type: number
+                            description: Positive VAT base amount for the rate of 20% (10)
+                vat_separate_negative:
+                    type: object
+                    description: Separate negative VAT amounts for different rates
+                    properties:
+                        20:
+                            type: number
+                            description: Negative VAT amount for the rate of 20% (0)
+                vat_separate_positive:
+                    type: object
+                    description: Separate positive VAT amounts for different rates
+                    properties:
+                        20:
+                            type: number
+                            description: Positive VAT amount for the rate of 20% (2)
+
+        AccountingDetail:
+            type: object
+            properties:
+                analytics_account:
+                    type: string
+                    description: Analytics account
+                operation:
+                    type: string
+                    description: Operation
+                order:
+                    type: string
+                    description: Order name
+                place:
+                    type: string
+                    description: Place name
+                preconfidence:
+                    type: string
+                    description: Preconfidence
+                synthetic_account:
+                    type: string
+                    description: Synthetic account
+                type:
+                    type: string
+                    description: Item type (`item` (goods), `service` (service))
+
+        Error:
+            type: object
+            properties:
+                error:
+                    type: integer
+                error_message:
+                    type: string
+                message:
+                    type: string
+
+        Message:
+            type: object
+            properties:
+                error:
+                    type: integer
+                message:
+                    type: string
