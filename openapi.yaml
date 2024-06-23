@@ -1575,7 +1575,9 @@ paths:
                     description: Successful response.
                     content:
                         application/pdf:
-                            example: !include response_pdf.example
+                            schema:
+                                type: string
+                                format: binary
     /invoices/delete/{id}:
         get:
             summary: Delete invoice by ID.
@@ -1592,12 +1594,12 @@ paths:
                     description: Successful deletion
                     content:
                         application/json:
-                            example: !include response_delete_invoice.example
+                            example: response_delete_invoice.example
                 404:
                     description: Wrong ID
                     content:
                         application/json:
-                            example: !include response_wrong_id.example
+                            example: response_wrong_id.example
     /invoices/will_not_be_paid/{id}:
         get:
             summary: Set invoice as "will not be paid".
@@ -1614,17 +1616,17 @@ paths:
                     description: Successfully marked
                     content:
                         application/json:
-                            example: !include response_mark_as_not_paid.example
+                            example: response_mark_as_not_paid.example
                 404:
                     description: Wrong invoice
                     content:
                         application/json:
-                            example: !include response_wrong_invoice.example
+                            example: response_wrong_invoice.example
                 403:
                     description: Insufficient privileges
                     content:
                         application/json:
-                            example: !include response_insufficient_privileges.example
+                            example: response_insufficient_privileges.example
     /invoice_payments/add/ajax:1/api:1:
         post:
             summary: Pay invoice.
@@ -1633,23 +1635,23 @@ paths:
             requestBody:
                 content:
                     application/json:
-                        example: !include request_pay_invoice.example
+                        example: request_pay_invoice.example
             responses:
                 200:
                     description: Successfully added payment
                     content:
                         application/json:
-                            example: !include response_pay_invoice.example
+                            example: response_pay_invoice.example
                 404:
                     description: Invalid ID
                     content:
                         application/json:
-                            example: !include response_pay_invalid_id.example
+                            example: response_pay_invalid_id.example
                 400:
                     description: Paying invalid invoice type
                     content:
                         application/json:
-                            example: !include response_pay_invalid_type.example
+                            example: response_pay_invalid_type.example
     /invoices/send:
         post:
             summary: Send invoice via mail.
@@ -1658,28 +1660,28 @@ paths:
             requestBody:
                 content:
                     application/json:
-                        example: !include request_send_invoice.example
+                        example: request_send_invoice.example
             responses:
                 200:
                     description: Successfully sent
                     content:
                         application/json:
-                            example: !include response_send_invoice.example
+                            example: response_send_invoice.example
                 404:
                     description: Invoice not found
                     content:
                         application/json:
-                            example: !include response_send_invoice_not_found.example
+                            example: response_send_invoice_not_found.example
                 # 13:
                 #     description: Invalid recipient email address
                 #     content:
                 #         application/json:
-                #             example: !include response_send_invalid_email.example
+                #             example: response_send_invalid_email.example
                 # 1:
                 #     description: Any other problem
                 #     content:
                 #         application/json:
-                #             example: !include response_send_other_problem.example
+                #             example: response_send_other_problem.example
     /invoices/mark_as_sent:
         post:
             summary: Mark invoice as sent via email.
@@ -1688,28 +1690,28 @@ paths:
             requestBody:
                 content:
                     application/json:
-                        example: !include request_mark_as_sent.example
+                        example: request_mark_as_sent.example
             responses:
                 200:
                     description: Successfully marked
                     content:
                         application/json:
-                            example: !include response_mark_as_sent.example
+                            example: response_mark_as_sent.example
                 # 2:
                 #     description: Wrong HTTP method
                 #     content:
                 #         application/json:
-                #             example: !include response_mark_as_sent_wrong_method.example
+                #             example: response_mark_as_sent_wrong_method.example
                 400:
                     description: Invalid data
                     content:
                         application/json:
-                            example: !include response_mark_as_sent_invalid_data.example
+                            example: response_mark_as_sent_invalid_data.example
                 500:
                     description: Invalid invoice ID
                     content:
                         application/json:
-                            example: !include response_mark_as_sent_invalid_id.example
+                            example: response_mark_as_sent_invalid_id.example
     /invoices/post:
         post:
             summary: Send invoice via post
