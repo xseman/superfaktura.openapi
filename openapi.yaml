@@ -332,11 +332,11 @@ paths:
                             schema:
                                 type: object
                                 allOf:
-                                  - $ref: "#/components/schemas/SummaryRes"
-                                  - properties:
-                                        status:
-                                            type: number
-                                    
+                                    - $ref: "#/components/schemas/SummaryRes"
+                                    - properties:
+                                          status:
+                                              type: number
+
                 400:
                     description: Wrong item
                     content:
@@ -426,10 +426,10 @@ paths:
                             allOf:
                                 - $ref: "#/components/schemas/Client"
                                 - properties:
-                                        name:
-                                            type: string
-                                            description: Client name
-                                
+                                      name:
+                                          type: string
+                                          description: Client name
+
             responses:
                 200:
                     description: Successful update
@@ -767,7 +767,7 @@ paths:
                     content:
                         application/json:
                             example: '{"error":1,"error_message":"Expense not found","message":"Expense not found"}'
-                            
+
     # FIXME: non standard path, unable to define
     /expenses/index.json[/{ATTRIBUTE}:{VALUE}]*/:
         get:
@@ -1296,7 +1296,7 @@ paths:
                                         error: 1
                                         message: "Invalid invoice IDs format."
                                         status: false
-    
+
     # FIXME: non standard path, unable to define
     /invoices/index.json[/{ATTRIBUTE}:{VALUE}]*:
         get:
@@ -1304,7 +1304,7 @@ paths:
             description: |
                 Retrieve a list of invoices with optional filters and sorting.
             tags:
-              - Invoice
+                - Invoice
             parameters:
                 # Path parameters
                 - name: direction
@@ -1561,15 +1561,15 @@ paths:
                                                 type: integer
     /exports:
         post:
-            summary: Export invoices.
+            summary: Export multiple invoices in PDF or XLS format.
             tags:
                 - Invoice
             requestBody:
+                required: true
                 content:
                     application/json:
-                        example:
-                            # TODO: schemas
-                            $ref: {}
+                        schema:
+                            $ref: "#/components/schemas/Export"
             responses:
                 200:
                     description: Successful response.
@@ -1578,6 +1578,22 @@ paths:
                             schema:
                                 type: string
                                 format: binary
+                403:
+                    description: Insufficient privileges to perform the export.
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    error:
+                                        type: integer
+                                        example: 1
+                                    message:
+                                        type: string
+                                        example: Access denied
+                                    error_message:
+                                        type: string
+                                        example: Access denied
     /invoices/delete/{id}:
         get:
             summary: Delete invoice by ID.
@@ -2355,7 +2371,7 @@ paths:
                             example:
                                 error: 1
                                 error_message: "Stock item not found"
-    
+
     # FIXME: non standard path, unable to define
     /stock_items/index.json[/{ATTRIBUTE}:{VALUE}]*:
         get:
@@ -2438,16 +2454,16 @@ paths:
                         application/json:
                             schema:
                                 allOf:
-                                  - $ref: "#/components/schemas/Paging"
-                                  - type: object
-                                    properties:
-                                        itemCount:
-                                            type: integer
-                                        items: 
-                                            type: array
-                                            properties:
-                                                StockItem: 
-                                                    $ref: "#/components/schemas/StockItem"
+                                    - $ref: "#/components/schemas/Paging"
+                                    - type: object
+                                      properties:
+                                          itemCount:
+                                              type: integer
+                                          items:
+                                              type: array
+                                              properties:
+                                                  StockItem:
+                                                      $ref: "#/components/schemas/StockItem"
                 400:
                     description: Invalid request
                     content:
@@ -2849,36 +2865,36 @@ components:
             allOf:
                 - $ref: "#/components/schemas/BankAccount"
                 - required:
-                    - bank_name
-                    - iban
-                    - swift
-                    - bank_account
-                    - bank_code
+                      - bank_name
+                      - iban
+                      - swift
+                      - bank_account
+                      - bank_code
                 - properties:
-                        show_account:
-                            type: integer
-                            description: |
-                                Indicates if the bank account details (account number
-                                and bank code) should be shown on documents.
-                                (0=no,1=yes)
-                
+                      show_account:
+                          type: integer
+                          description: |
+                              Indicates if the bank account details (account number
+                              and bank code) should be shown on documents.
+                              (0=no,1=yes)
+
         BankAccountRes:
             type: object
             allOf:
                 - $ref: "#/components/schemas/BankAccount"
                 - properties:
-                    id:
-                        type: string
-                    country_id:
-                        type: string
-                    created:
-                        type: string
-                    modified:
-                        type: string
-                    user_id:
-                        type: string
-                    user_profile_id:
-                        type: string
+                      id:
+                          type: string
+                      country_id:
+                          type: string
+                      created:
+                          type: string
+                      modified:
+                          type: string
+                      user_id:
+                          type: string
+                      user_profile_id:
+                          type: string
 
         CashRegister:
             type: object
@@ -3157,7 +3173,7 @@ components:
                 vat_total:
                     type: number
                     description: Total VAT amount (1.8)
-        
+
         Paging:
             type: object
             properties:
@@ -3174,32 +3190,32 @@ components:
         CashRegisterRes:
             type: object
             allOf:
-              - $ref: "#/components/schemas/CashRegisterItem"
-              - $ref: "#/components/schemas/Paging"
-              - properties:
-                    CashRegister:
-                        $ref: "#/components/schemas/CashRegister"
-                    error:
-                        type: string
-                    itemCount:
-                        type: number
-                    items:
-                        type: array
-                        properties:
-                            0:
-                                properties:
-                                    has_storno:
-                                        type: string
-                            CashRegisterItem:
-                                $ref: "#/components/schemas/CashRegisterItem"
-                            Summary:
-                                $ref: "#/components/schemas/Summary"
-                            EetReceipt:
-                                $ref: "#/components/schemas/EetReceipt"
-                            Expense:
-                                $ref: "#/components/schemas/Expense"
-                            Invoice:
-                                $ref: "#/components/schemas/Invoice"
+                - $ref: "#/components/schemas/CashRegisterItem"
+                - $ref: "#/components/schemas/Paging"
+                - properties:
+                      CashRegister:
+                          $ref: "#/components/schemas/CashRegister"
+                      error:
+                          type: string
+                      itemCount:
+                          type: number
+                      items:
+                          type: array
+                          properties:
+                              0:
+                                  properties:
+                                      has_storno:
+                                          type: string
+                              CashRegisterItem:
+                                  $ref: "#/components/schemas/CashRegisterItem"
+                              Summary:
+                                  $ref: "#/components/schemas/Summary"
+                              EetReceipt:
+                                  $ref: "#/components/schemas/EetReceipt"
+                              Expense:
+                                  $ref: "#/components/schemas/Expense"
+                              Invoice:
+                                  $ref: "#/components/schemas/Invoice"
 
         CashRegisterItemReq:
             type: object
@@ -3211,31 +3227,31 @@ components:
             allOf:
                 - $ref: "#/components/schemas/CashRegisterItem"
                 - properties:
-                    error:
-                        type: string
-                    itemCount:
-                        type: number
-                    items:
-                        type: array
-                        properties:
-                            CashRegisterItem:
-                                $ref: "#/components/schemas/CashRegisterItem"
-                            Summary:
-                                $ref: "#/components/schemas/Summary"
-                            EetReceipt:
-                                $ref: "#/components/schemas/EetReceipt"
-                            Expense:
-                                $ref: "#/components/schemas/Expense"
-                            Invoice:
-                                $ref: "#/components/schemas/Invoice"
-                            0:
-                                properties:
-                                    has_storno:
-                                        type: string
-                    flag:
-                        type: string
-                    status:
-                        type: string
+                      error:
+                          type: string
+                      itemCount:
+                          type: number
+                      items:
+                          type: array
+                          properties:
+                              CashRegisterItem:
+                                  $ref: "#/components/schemas/CashRegisterItem"
+                              Summary:
+                                  $ref: "#/components/schemas/Summary"
+                              EetReceipt:
+                                  $ref: "#/components/schemas/EetReceipt"
+                              Expense:
+                                  $ref: "#/components/schemas/Expense"
+                              Invoice:
+                                  $ref: "#/components/schemas/Invoice"
+                              0:
+                                  properties:
+                                      has_storno:
+                                          type: string
+                      flag:
+                          type: string
+                      status:
+                          type: string
 
         CashRegisterItem:
             type: object
@@ -4046,3 +4062,50 @@ components:
                     type: integer
                 message:
                     type: string
+
+        Export:
+            type: object
+            required:
+                - is_msel
+                - invoices_pdf
+            properties:
+                is_msel:
+                    type: boolean
+                    description: is multiselect; needs to be true
+                hide_pdf_payment_info:
+                    type: boolean
+                    default: false
+                    description: hide payment information
+                hide_signature:
+                    type: boolean
+                    default: false
+                    description: hide signature in invoices
+                invoices_pdf:
+                    type: boolean
+                    default: false
+                    description: export in PDF format
+                invoices_xls:
+                    type: boolean
+                    default: false
+                    description: export in XLS format
+                merge_pdf:
+                    type: boolean
+                    default: false
+                    description: export single + merged PDFs
+                pdf_lang_default:
+                    type: boolean
+                    default: false
+                    description: |
+                        translate documents to default language (SK: Slovak, CZ: Czech)
+                pdf_sort_client:
+                    type: boolean
+                    default: false
+                    description: sort documents by client
+                pdf_sort_date:
+                    type: boolean
+                    default: false
+                    description: sort documents by date
+                only_merge:
+                    type: boolean
+                    default: false
+                    description: export only merged PDFs
