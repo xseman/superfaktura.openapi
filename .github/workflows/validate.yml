@@ -1,0 +1,33 @@
+name: validate
+
+on:
+    pull_request:
+        branches:
+            - master
+    push:
+        branches:
+            - master
+
+jobs:
+    validate:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: actions/setup-go@v5
+              with:
+                  go-version: stable
+
+            - uses: oven-sh/setup-bun@v2
+
+            - name: Install xseman/openapi-generator
+              run: go install github.com/xseman/openapi-generator/cmd/openapi-generator@latest
+
+            - name: Validate OpenAPI definition
+              run: ./scripts/validate.sh
+
+            - name: Generate TypeScript client
+              run: ./scripts/generate.sh
+
+            - name: Test generated client (offline, docs examples)
+              run: bun scripts/test-client.ts
