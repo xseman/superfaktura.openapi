@@ -10,6 +10,6 @@ end_of_line = lf
 charset = utf-8
 insert_final_newline = true
 
-[*.yaml]
+[*.{yml,yaml}]
 indent_size = 4
 indent_style = space
